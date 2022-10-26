@@ -18,8 +18,41 @@ Server::~Server()
 
 void	Server::start()
 {
-	struct pollfd *poll_fds;
-	poll_fds = (struct pollfd *)calloc(1, sizeof(struct pollfd));
+	pollfd	server_fd = {this->sock, POLLIN, 0};
+	poll_fds.push_back(server_fd);
+
+	console_log("Server waiting for connections");
+
+	while (this->running)
+	{
+		// waiting for events
+		if (poll(poll_fds.begin().base(), poll_fds.size(), -1) < 0)
+			throw std::runtime_error("Error while polling");
+		// event handling
+		for (std::vector<pollfd>::iterator it = poll_fds.begin(); it != poll_fds.end(); ++it)
+		{
+			// no events
+			if (it->revents == 0)
+				continue ;
+			// on connect
+			if ((it->revents & POLLIN) == POLLIN)
+			{
+				if (it->fd == this->sock)
+				{
+					this->handle_connection();
+					break ;
+				}
+			}
+			// on disconnect
+			if ((it->revents & POLLHUP) == POLLHUP)
+			{
+				this->handle_disconnection(it->fd);
+				break ;
+			}
+		}
+	}
+
+	/*poll_fds = (struct pollfd *)calloc(1, sizeof(struct pollfd));
 	poll_fds[0].fd = this->sock;
 	poll_fds[0].events = POLLIN;
 	while (this->running)
@@ -44,7 +77,7 @@ void	Server::start()
 		}
 		if ((poll_fds->revents & POLLHUP) == POLLHUP)
 			console_log("disconnected");
-	}
+	}*/
 }
 
 int	Server::create_socket()
@@ -73,5 +106,38 @@ int	Server::create_socket()
 	if (listen(sockfd, MAX_CONNECTIONS) < 0)
 		throw std::runtime_error("Error while listening in socket");
 	return (sockfd);
+}
+
+void	Server::handle_connection()
+{
+	int			fd;
+	sockaddr_in	addr = {};
+	socklen_t 	size;
+	//char		msg[1000];
+
+	// accept connection
+	size = sizeof(addr);
+	fd = accept(this->sock, (sockaddr *)&addr, &size);
+	if (fd < 0)
+		throw std::runtime_error("Error while accepting new client");
+	pollfd	poll_fd = {fd, POLLIN, 0};
+	this->poll_fds.push_back(poll_fd);
+
+	//Client *client = new Client(fd, hostname, ntohs(s_address.sin_port));
+	//_clients.insert(std::make_pair(fd, client));
+
+	//sprintf(msg, "%s:%d has connected", client->getHostname().c_str(), client->getPort());
+	//console_log(msg);
+	console_log("TODO connection");
+}
+
+void	Server::handle_disconnection(int fd)
+{
+	try
+	{
+		// TODO disconnect
+		console_log("TODO disconnection");
+	}
+	catch (std::out_of_range const &err) {}
 }
 

@@ -7,9 +7,6 @@
 #include <time.h>
 
 
-#define MAX_CONNECTIONS 200
-
-
 inline void	console_log(std::string const &msg)
 {
 	time_t		raw_time;
