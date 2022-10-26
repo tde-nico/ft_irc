@@ -1,0 +1,7 @@
+# dirs
+.vscode/
+objs/
+
+# files
+*.o
+ircserv
