@@ -77,7 +77,7 @@ bonus: all
 
 test: all
 	clear
-	@./$(NAME) 6667 test
+	@./$(NAME) 6667 "test"
 
 run: test
 rrun: fclean test

@@ -17,8 +17,11 @@
 #include <cstdio>
 #include <cerrno>
 
+class Server;
+
 #include "utils.hpp"
 #include "Client.hpp"
+#include "CommandHandler.hpp"
 
 #define MAX_CONNECTIONS 200
 
@@ -33,6 +36,7 @@ class Server
 		int						running;
 		std::vector<pollfd>		poll_fds;
 		std::map<int, Client *>	clients;
+		CommandHandler			*handler;
 
 	public:
 		Server(std::string const &port, std::string const &password);

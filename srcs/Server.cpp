@@ -7,11 +7,21 @@ Server::Server(std::string const &port, std::string const &password)
 	this->password = password;
 	this->running = 1;
 	this->sock = this->create_socket();
+	this->handler = new CommandHandler((this), password);
 	console_log("Main Socket Created");
 }
 
 Server::~Server()
 {
+	/*console_log("dest");
+	for (std::map<int, Client *>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
+	{
+		console_log(it->second->getHostname());
+		this->handle_disconnection(it->second->getFd());
+	}
+	console_log("not cicle");
+	this->clients.clear();
+	delete this->handler;*/
 	close(this->sock);
 	console_log("Main Socket Closed");
 }
@@ -89,12 +99,18 @@ void	Server::handle_connection()
 	sockaddr_in	addr = {};
 	socklen_t 	size;
 	char		msg[1000];
+	std::string	pass;
+	std::string	tmp_pass;
 
 	// accept connection
 	size = sizeof(addr);
 	fd = accept(this->sock, (sockaddr *)&addr, &size);
 	if (fd < 0)
 		throw std::runtime_error("Error while accepting new client");
+	// request the password at the client
+	if (send(fd, "Please insert the password: ", strlen("Please insert the password: "), 0) == -1)
+		throw std::runtime_error("Error while requesting the password");
+	// save th client's fd
 	pollfd	poll_fd = {fd, POLLIN, 0};
 	this->poll_fds.push_back(poll_fd);
 	// get client info
@@ -140,10 +156,10 @@ int	Server::handle_message(int fd)
 		this->handle_disconnection(fd);
 		return (1);
 	}
-	// TODO command handler
-	console_log("TODO command handler");
-	// TODO command handler
-	console_log(msg);
+	// command handling
+	Client	*client = this->clients.at(fd);
+	if (this->handler->handle_command(client, msg))
+		return (1);
 	return (0);
 }
 
@@ -155,7 +171,7 @@ void	Server::handle_disconnection(int fd)
 		char 	msg[1000];
 
 		// message of disconnection
-		sprintf(msg, "%s:%d has disconnected.", client->getHostname().c_str(), client->getPort());
+		sprintf(msg, "%s:%d has disconnected", client->getHostname().c_str(), client->getPort());
 		console_log(msg);
 		// remove the client
 		this->clients.erase(fd);

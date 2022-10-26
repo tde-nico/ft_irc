@@ -1,6 +1,13 @@
-metotdo per disconnettere
+clean up metodi vari
 
-user
-canali
+splitter cmd
+
+executioner cmd
+
+channels
+
+admin
+
+implementazione signal ?
 
 bonus ?
