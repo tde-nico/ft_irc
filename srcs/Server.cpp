@@ -18,7 +18,7 @@ Server::~Server()
 
 void	Server::start()
 {
-	pollfd	server_fd = {this->sock, POLLIN, 0};
+	pollfd	server_fd = {this->sock, POLLIN | POLLHUP, 0};
 	poll_fds.push_back(server_fd);
 
 	console_log("Server waiting for connections");
@@ -42,6 +42,8 @@ void	Server::start()
 					this->handle_connection();
 					break ;
 				}
+				if (this->handle_message(it->fd))
+					break ;
 			}
 			// on disconnect
 			if ((it->revents & POLLHUP) == POLLHUP)
@@ -51,33 +53,6 @@ void	Server::start()
 			}
 		}
 	}
-
-	/*poll_fds = (struct pollfd *)calloc(1, sizeof(struct pollfd));
-	poll_fds[0].fd = this->sock;
-	poll_fds[0].events = POLLIN;
-	while (this->running)
-	{
-		if (poll(poll_fds, 1, -1) < 0)
-			throw std::runtime_error("Error while polling");
-		if ((poll_fds->revents & POLLIN) == POLLIN)
-		{
-			console_log("connected");
-			struct sockaddr_in addr = {};
-			socklen_t s_size = sizeof(addr);
-			int fd = accept(this->sock, (struct sockaddr *)&addr, &s_size);
-			if (fd < 0)
-				throw std::runtime_error("Error while accepting");
-			console_log("accepted");
-			char hostname[NI_MAXHOST];
-			getnameinfo((struct sockaddr *) &addr, sizeof(addr), hostname, NI_MAXHOST, NULL, 0, NI_NUMERICSERV);
-			std::cout << hostname << "  " << fd << "\n";
-			char buffer[1024];
-			recv(fd, buffer, 1024, 0);
-			std::cout << buffer << "\n";
-		}
-		if ((poll_fds->revents & POLLHUP) == POLLHUP)
-			console_log("disconnected");
-	}*/
 }
 
 int	Server::create_socket()
@@ -113,7 +88,7 @@ void	Server::handle_connection()
 	int			fd;
 	sockaddr_in	addr = {};
 	socklen_t 	size;
-	//char		msg[1000];
+	char		msg[1000];
 
 	// accept connection
 	size = sizeof(addr);
@@ -122,21 +97,77 @@ void	Server::handle_connection()
 		throw std::runtime_error("Error while accepting new client");
 	pollfd	poll_fd = {fd, POLLIN, 0};
 	this->poll_fds.push_back(poll_fd);
+	// get client info
+	if (getsockname(fd, (struct sockaddr *)&addr, &size) != 0)
+		throw std::runtime_error("Error while gathering client informations");
+	// create a new client
+	Client *new_client = new Client(fd, inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+	this->clients.insert(std::make_pair(fd, new_client));
+	// log new connection
+	sprintf(msg, "%s:%d has connected", new_client->getHostname().c_str(), new_client->getPort());
+	console_log(msg);
+}
 
-	//Client *client = new Client(fd, hostname, ntohs(s_address.sin_port));
-	//_clients.insert(std::make_pair(fd, client));
+std::string	Server::recive(int fd)
+{
+	std::string	msg;
+	char		buffer[100];
 
-	//sprintf(msg, "%s:%d has connected", client->getHostname().c_str(), client->getPort());
-	//console_log(msg);
-	console_log("TODO connection");
+	bzero(buffer, 100);
+	// recive until new line
+	while (!std::strstr(buffer, "\n"))
+	{
+		bzero(buffer, 100);
+		if (recv(fd, buffer, 100, 0) < 0)
+		{
+			if (errno != EWOULDBLOCK)
+				throw std::runtime_error("Error while reciving from client");
+		}
+		// clear buffer means exit (UNIX)
+		if (!buffer[0])
+			return ("");
+		msg.append(buffer);
+	}
+	return (msg);
+}
+
+int	Server::handle_message(int fd)
+{
+	std::string msg = this->recive(fd);
+	// if disconnected
+	if (msg[0] == 0)
+	{
+		this->handle_disconnection(fd);
+		return (1);
+	}
+	// TODO command handler
+	console_log("TODO command handler");
+	// TODO command handler
+	console_log(msg);
+	return (0);
 }
 
 void	Server::handle_disconnection(int fd)
 {
 	try
 	{
-		// TODO disconnect
-		console_log("TODO disconnection");
+		Client	*client = this->clients.at(fd);
+		char 	msg[1000];
+
+		// message of disconnection
+		sprintf(msg, "%s:%d has disconnected.", client->getHostname().c_str(), client->getPort());
+		console_log(msg);
+		// remove the client
+		this->clients.erase(fd);
+		for (std::vector<pollfd>::iterator it = poll_fds.begin(); it != poll_fds.end(); ++it)
+		{
+			if (it->fd != fd)
+				continue ;
+			this->poll_fds.erase(it);
+			close(fd);
+			break ;
+		}
+		delete client;
 	}
 	catch (std::out_of_range const &err) {}
 }

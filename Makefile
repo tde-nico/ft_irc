@@ -19,7 +19,12 @@ CFLAGS			= -Wall -Wextra -Werror -std=c++98
 
 MD				= mkdir -p
 RM				= rm -rf
-TAR				= tar --exclude=".git" --exclude=".vscode" --exclude="objs" -cf
+TAR_EXCLUSIONS	= --exclude=".git" \
+				  --exclude=".vscode" \
+				  --exclude="objs" \
+				  --exclude="*._*" \
+				  --exclude="*.DS_Store"
+TAR				= tar $(TAR_EXCLUSIONS) -cf
 
 #####   RESOURCES   #####
 

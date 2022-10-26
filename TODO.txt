@@ -1,5 +1,3 @@
-cleanup
-vector degli fd delle connesiioni
 metotdo per disconnettere
 
 user

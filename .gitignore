@@ -3,5 +3,7 @@
 objs/
 
 # files
+.DS_Store
+._*
 *.o
 ircserv
