@@ -26,9 +26,13 @@ TAR_EXCLUSIONS	= --exclude=".git" \
 				  --exclude="*.DS_Store"
 TAR				= tar $(TAR_EXCLUSIONS) -cf
 
-#####   RESOURCES   #####
+#####   INFO   #####
 
 NAME			= ircserv
+PORT			= 6667
+PASSWORD		= "test"
+
+#####   RESOURCES   #####
 
 INCLUDE			= includes/
 SRC_DIR			= srcs
@@ -77,7 +81,7 @@ bonus: all
 
 test: all
 	clear
-	@./$(NAME) 6667 "test"
+	@./$(NAME) $(PORT) $(PASSWORD)
 
 run: test
 rrun: fclean test
@@ -85,6 +89,10 @@ rrun: fclean test
 tar: fclean
 	@ $(TAR) ../$(NAME).tar .
 	@ echo "$(GREEN)[+] Made tar$(END)"
+
+val: all
+	valgrind --leak-check=full ./$(NAME) $(PORT) $(PASSWORD)
+var: val
 
 
 

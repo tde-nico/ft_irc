@@ -6,6 +6,4 @@ channels
 
 admin
 
-implementazione signal ?
-
 bonus ?

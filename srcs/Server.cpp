@@ -13,16 +13,14 @@ Server::Server(std::string const &port, std::string const &password)
 
 Server::~Server()
 {
-	/*console_log("dest");
+	std::vector<int> fds;
+
+	// disconnect all clients
 	for (std::map<int, Client *>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
-	{
-		console_log(it->second->getHostname());
-		this->handle_disconnection(it->second->getFd());
-	}
-	console_log("not cicle");
-	this->clients.clear();
-	delete this->handler;*/
-	
+		fds.push_back(it->second->getFd());
+	for (int fd = 0; fd != (int)fds.size(); ++fd)
+		this->handle_disconnection(fds[fd]);
+	// clean memory
 	delete this->handler;
 	close(this->sock);
 	console_log("Main Socket Closed");
