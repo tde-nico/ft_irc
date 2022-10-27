@@ -1,5 +1,3 @@
-clean up metodi vari
-
 splitter cmd
 
 executioner cmd

@@ -22,15 +22,24 @@ Server::~Server()
 	console_log("not cicle");
 	this->clients.clear();
 	delete this->handler;*/
+	
+	delete this->handler;
 	close(this->sock);
 	console_log("Main Socket Closed");
 }
 
+void	handle_sigint(int sig)
+{
+	(void)sig;
+	throw ServerQuitException();
+}
+
 void	Server::start()
 {
-	pollfd	server_fd = {this->sock, POLLIN | POLLHUP, 0};
+	pollfd	server_fd = {this->sock, POLLIN, 0};
 	poll_fds.push_back(server_fd);
 
+	signal(SIGINT, handle_sigint);
 	console_log("Server waiting for connections");
 
 	while (this->running)
@@ -98,7 +107,6 @@ void	Server::handle_connection()
 	int			fd;
 	sockaddr_in	addr = {};
 	socklen_t 	size;
-	char		_msg[1000];
 	std::string	pass;
 	std::string	tmp_pass;
 
@@ -108,7 +116,7 @@ void	Server::handle_connection()
 	if (fd < 0)
 		throw std::runtime_error("Error while accepting new client");
 	// request the password at the client
-	if (send(fd, "Please insert the password: ", strlen("Please insert the password: "), 0) == -1)
+	if (send(fd, INSERT_PASS, strlen(INSERT_PASS), 0) == -1)
 		throw std::runtime_error("Error while requesting the password");
 	// save th client's fd
 	pollfd	poll_fd = {fd, POLLIN, 0};
@@ -120,8 +128,7 @@ void	Server::handle_connection()
 	Client *new_client = new Client(fd, inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 	this->clients.insert(std::make_pair(fd, new_client));
 	// log new connection
-	sprintf(_msg, "%s:%d has connected", new_client->getHostname().c_str(), new_client->getPort());
-	console_log(_msg);
+	console_log(new_client->log("has connected"));
 }
 
 std::string	Server::recive(int fd)
@@ -159,7 +166,10 @@ int	Server::handle_message(int fd)
 	// command handling
 	Client	*client = this->clients.at(fd);
 	if (this->handler->handle_command(client, _msg))
+	{
+		this->handle_disconnection(client->getFd());
 		return (1);
+	}
 	return (0);
 }
 
@@ -168,11 +178,9 @@ void	Server::handle_disconnection(int fd)
 	try
 	{
 		Client	*client = this->clients.at(fd);
-		char 	_msg[1000];
 
 		// message of disconnection
-		sprintf(_msg, "%s:%d has disconnected", client->getHostname().c_str(), client->getPort());
-		console_log(_msg);
+		console_log(client->log("has disconnected"));
 		// remove the client
 		this->clients.erase(fd);
 		for (std::vector<pollfd>::iterator it = poll_fds.begin(); it != poll_fds.end(); ++it)

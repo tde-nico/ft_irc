@@ -4,8 +4,11 @@
 #pragma once
 
 #include <iostream>
-#include <vector>
 #include <time.h>
+#include <signal.h>
+#include <cstring>
+#include <cstdio>
+#include <vector>
 
 
 inline void	console_log(std::string const &msg)

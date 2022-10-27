@@ -13,6 +13,10 @@ int	main(int argc, char **argv)
 		Server server(argv[1], argv[2]);
 		server.start();
 	}
+	catch (ServerQuitException &err)
+	{
+		console_log(err.what());
+	}
 	catch (std::exception &err)
 	{
 		std::cout << "Error: " << err.what() << "\n";

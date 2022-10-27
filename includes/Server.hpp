@@ -8,13 +8,11 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <cstring>
 #include <string>
 #include <sstream>
 #include <poll.h>
 #include <vector>
 #include <map>
-#include <cstdio>
 #include <cerrno>
 
 class Server;
@@ -25,6 +23,12 @@ class Server;
 
 #define MAX_CONNECTIONS 200
 
+
+class ServerQuitException: public std::exception
+{
+	public:
+		std::string	what() { return ("Quitting from server"); }
+};
 
 class Server
 {

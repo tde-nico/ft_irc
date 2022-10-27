@@ -2,7 +2,7 @@
 
 CommandHandler::CommandHandler(Server *server, std::string const &password)
 {
-	this->server = server;
+	this->server = server; // remove if not used
 	this->password = password;
 }
 
@@ -11,49 +11,47 @@ CommandHandler::~CommandHandler() {}
 int	CommandHandler::handle_command(Client *client, std::string cmd)
 {
 	char		_msg[100];
-	if (client->getStatus() == 0) // not logged
-	{
-		std::string	pass;
+	int			ret;
 
-		pass.append(this->password).append("\n");
-		if (cmd.compare(pass))
-		{
-			if (send(client->getFd(), "Wrong password\n", strlen("Wrong password\n"), 0) == -1)
-				throw std::runtime_error("Error while requesting the password");
-			//this->server->handle_disconnection(client->getFd());
-			// request the password at the client
-			if (send(client->getFd(), "Please insert the password: ", strlen("Please insert the password: "), 0) == -1)
-				throw std::runtime_error("Error while requesting the password");
-			console_log("A client failed to enter the correct password");
-			return (0);
-		}
-		client->setStatus(1);
-		sprintf(_msg, "%s:%d has logged in", client->getHostname().c_str(), client->getPort());
-		console_log(_msg);
-		return (0);
-	}
-	else if (client->getStatus() == 1)
+	if (client->getStatus() == 0) // not logged
+		return (this->log_in(client, cmd));
+	else if (client->getStatus() == 1) // logged
 	{
-		if (exec_cmd(parse_cmd(cmd), client) == 0)
+		ret = exec_cmd(parse_cmd(cmd), client);
+		if (ret == 0)
 		{
 			sprintf(_msg, "Unknown command : %s", cmd.c_str());
 			if (send(client->getFd(), _msg, strlen(_msg), 0) < 0 )
 				throw std::runtime_error("Error while sending failed command");
-		/*console_log(cmd);
-		if (!cmd.compare("exit\n"))
-			throw std::runtime_error("exit");
-		*/
 		}
-		
-		//client->printUserInfo();
+		else if (ret == 2)
+			return (1);
 	}
-	if (client->getStatus() == 2)
+	if (client->getStatus() == 2) // admin
 	{
 		// TODO admin commands
 	}
 	return (0);
 }
 
+int	CommandHandler::log_in(Client *client, std::string cmd)
+{
+	std::string	pass;
+
+	pass.append(this->password).append("\n");
+	if (cmd.compare(pass))
+	{
+		if (send(client->getFd(), WRONG_PASS, strlen(WRONG_PASS), 0) == -1)
+			throw std::runtime_error("Error while requesting the password");
+		if (send(client->getFd(), INSERT_PASS, strlen(INSERT_PASS), 0) == -1)
+			throw std::runtime_error("Error while requesting the password");
+		console_log(client->log("failed to log"));
+		return (0);
+	}
+	client->setStatus(1);
+	console_log(client->log("has logged in"));
+	return (0);
+}
 
 std::vector<std::string>	splitted_vect(std::string cmd)
 {
@@ -95,6 +93,7 @@ int		CommandHandler::parse_cmd(std::string cmd)
 	if (_splitted_cmd.front().compare("msg") == 0) return (msg);
 	if (_splitted_cmd.front().compare("kick") == 0) return (kick);
 	if (_splitted_cmd.front().compare("ban") == 0) return (ban);
+	if (_splitted_cmd.front().compare("exit") == 0) return (EXIT);
 	return (0);
 }
 
@@ -104,15 +103,16 @@ int	CommandHandler::exec_cmd(int cmd, Client *client)
 	switch (cmd)
 	{
 	case nick : return nickFun(this->_splitted_cmd, client); 
-	case join : console_log("CMD: comando scelto join\n");return 1;
-	case part : console_log("CMD: comando scelto part\n");return 1;
-	case set_nick : console_log("CMD: comando scelto set nick\n");return 1;
-	case whois : console_log("CMD: comando scelto  whois\n");return 1;
-	case msg : console_log("CMD: comando scelto  msg\n");return 1;
-	case kick : console_log("CMD: comando scelto set kick\n");return 1;
-	case ban : console_log("CMD: comando scelto  ban\n");return 1;
+	case join : console_log("CMD: comando scelto join");return 1;
+	case part : console_log("CMD: comando scelto part");return 1;
+	case set_nick : console_log("CMD: comando scelto set nick");return 1;
+	case whois : console_log("CMD: comando scelto  whois");return 1;
+	case msg : console_log("CMD: comando scelto  msg");return 1;
+	case kick : console_log("CMD: comando scelto set kick");return 1;
+	case ban : console_log("CMD: comando scelto  ban");return 1;
+	case EXIT : return 2;
 
-	default: console_log("CMD: Command not found\n");
+	default: console_log("CMD: Command not found");
 	break;
 	}
 	

@@ -40,7 +40,10 @@ class Client
 		void		setUsername(std::string username) { this->username = username; }
 		void		setRealname(std::string realname) { this->realname = realname; }
 		void		setStatus(int status) { this->status = status; }
-		void		printUserInfo(){std::cout << "nickname: " << getNickname() << "\n";};
+
+		void		printUserInfo(){std::cout << "nickname: " << getNickname() << "\n";}
+		std::string	identify();
+		std::string	log(std::string const &log);
 };
 
 
