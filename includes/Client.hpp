@@ -5,7 +5,6 @@
 
 #include "utils.hpp"
 
-
 class Client
 {
 	private:
@@ -41,7 +40,7 @@ class Client
 		void		setUsername(std::string username) { this->username = username; }
 		void		setRealname(std::string realname) { this->realname = realname; }
 		void		setStatus(int status) { this->status = status; }
-
+		void		printUserInfo(){std::cout << "nickname: " << getNickname() << "\n";};
 };
 
 

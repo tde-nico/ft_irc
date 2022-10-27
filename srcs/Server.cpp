@@ -98,7 +98,7 @@ void	Server::handle_connection()
 	int			fd;
 	sockaddr_in	addr = {};
 	socklen_t 	size;
-	char		msg[1000];
+	char		_msg[1000];
 	std::string	pass;
 	std::string	tmp_pass;
 
@@ -120,13 +120,13 @@ void	Server::handle_connection()
 	Client *new_client = new Client(fd, inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 	this->clients.insert(std::make_pair(fd, new_client));
 	// log new connection
-	sprintf(msg, "%s:%d has connected", new_client->getHostname().c_str(), new_client->getPort());
-	console_log(msg);
+	sprintf(_msg, "%s:%d has connected", new_client->getHostname().c_str(), new_client->getPort());
+	console_log(_msg);
 }
 
 std::string	Server::recive(int fd)
 {
-	std::string	msg;
+	std::string	_msg;
 	char		buffer[100];
 
 	bzero(buffer, 100);
@@ -142,23 +142,23 @@ std::string	Server::recive(int fd)
 		// clear buffer means exit (UNIX)
 		if (!buffer[0])
 			return ("");
-		msg.append(buffer);
+		_msg.append(buffer);
 	}
-	return (msg);
+	return (_msg);
 }
 
 int	Server::handle_message(int fd)
 {
-	std::string msg = this->recive(fd);
+	std::string _msg = this->recive(fd);
 	// if disconnected
-	if (msg[0] == 0)
+	if (_msg[0] == 0)
 	{
 		this->handle_disconnection(fd);
 		return (1);
 	}
 	// command handling
 	Client	*client = this->clients.at(fd);
-	if (this->handler->handle_command(client, msg))
+	if (this->handler->handle_command(client, _msg))
 		return (1);
 	return (0);
 }
@@ -168,11 +168,11 @@ void	Server::handle_disconnection(int fd)
 	try
 	{
 		Client	*client = this->clients.at(fd);
-		char 	msg[1000];
+		char 	_msg[1000];
 
 		// message of disconnection
-		sprintf(msg, "%s:%d has disconnected", client->getHostname().c_str(), client->getPort());
-		console_log(msg);
+		sprintf(_msg, "%s:%d has disconnected", client->getHostname().c_str(), client->getPort());
+		console_log(_msg);
 		// remove the client
 		this->clients.erase(fd);
 		for (std::vector<pollfd>::iterator it = poll_fds.begin(); it != poll_fds.end(); ++it)

@@ -4,6 +4,7 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
 #include <time.h>
 
 
@@ -20,5 +21,6 @@ inline void	console_log(std::string const &msg)
 	std::string now(buffer);
 	std::cout << "[" << now << "] " << msg << "\n";
 }
+
 
 #endif
