@@ -24,6 +24,7 @@ class Client
 		// 2: admin
 		int			status;
 		int			ChannelMode;
+		std::string	channelNameLogged;
 
 	public:
 		Client(int fd, std::string hostname, int port);
@@ -37,6 +38,7 @@ class Client
 		std::string	getRealname() const { return (realname); }
 		int			getStatus() const { return (status); }
 		int			getChannelmode(){ return (this->ChannelMode); }
+		std::string	getNameChannel() const { return (this->channelNameLogged); }
 		
 		void		setFd(int fd) { this->fd = fd; }
 		void		setHostname(std::string hostname) { this->hostname = hostname; }
@@ -46,6 +48,7 @@ class Client
 		void		setRealname(std::string realname) { this->realname = realname; }
 		void		setStatus(int status) { this->status = status; }
 		void		setChannelmode(int mode) { this->ChannelMode = mode; }
+		void		setChannelName(std::string str) { this->channelNameLogged = str; }
 
 		void		printUserInfo(){std::cout << "nickname: " << getNickname() << "\n";}
 		std::string	identify();

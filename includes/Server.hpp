@@ -41,7 +41,7 @@ class Server
 		int						sock;
 		int						running;
 		std::vector<pollfd>		poll_fds;
-		std::map<int, Client *>	clients;
+		std::map<int, Client *>	*clients;
 		CommandHandler			*handler;
 		std::vector<Channel*> 	*channels;
 	public:
@@ -55,6 +55,7 @@ class Server
 		int			handle_message(int fd);
 		void		handle_disconnection(int fd);
 		std::vector<Channel*>	*get_channels(){return this->channels;};
+		std::map<int, Client *> *get_clients(){return this->clients;}
 };
 
 #endif

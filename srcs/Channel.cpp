@@ -2,12 +2,12 @@
 #include "CommandHandler.hpp"
 #include "Server.hpp"
 #include "Client.hpp"
-/*
+
 Channel::Channel()
 {
-	
+	users = new std::vector<Client *>  ;
 }
-
+/*
 std::string		Channel::get_time()
 {
 	time_t		raw_time;

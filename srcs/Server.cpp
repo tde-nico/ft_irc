@@ -9,6 +9,7 @@ Server::Server(std::string const &port, std::string const &password)
 	this->sock = this->create_socket();
 	this->handler = new CommandHandler((this), password);
 	this->channels = new std::vector<Channel*>;
+	this->clients = new std::map<int, Client *>;
 	console_log("Main Socket Created");
 }
 
@@ -17,7 +18,7 @@ Server::~Server()
 	std::vector<int> fds;
 
 	// disconnect all clients
-	for (std::map<int, Client *>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
+	for (std::map<int, Client *>::iterator it = this->clients->begin(); it != this->clients->end(); ++it)
 		fds.push_back(it->second->getFd());
 	for (int fd = 0; fd != (int)fds.size(); ++fd)
 		this->handle_disconnection(fds[fd]);
@@ -125,7 +126,7 @@ void	Server::handle_connection()
 		throw std::runtime_error("Error while gathering client informations");
 	// create a new client
 	Client *new_client = new Client(fd, inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
-	this->clients.insert(std::make_pair(fd, new_client));
+	this->clients->insert(std::make_pair(fd, new_client));
 	// log new connection
 	console_log(new_client->log("has connected"));
 }
@@ -163,7 +164,7 @@ int	Server::handle_message(int fd)
 		return (1);
 	}
 	// command handling
-	Client	*client = this->clients.at(fd);
+	Client	*client = this->clients->at(fd);
 	if (this->handler->handle_command(client, _msg, this))
 	{
 		this->handle_disconnection(client->getFd());
@@ -176,12 +177,12 @@ void	Server::handle_disconnection(int fd)
 {
 	try
 	{
-		Client	*client = this->clients.at(fd);
+		Client	*client = this->clients->at(fd);
 
 		// message of disconnection
 		console_log(client->log("has disconnected"));
 		// remove the client
-		this->clients.erase(fd);
+		this->clients->erase(fd);
 		for (std::vector<pollfd>::iterator it = poll_fds.begin(); it != poll_fds.end(); ++it)
 		{
 			if (it->fd != fd)

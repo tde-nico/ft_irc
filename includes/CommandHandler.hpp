@@ -39,7 +39,7 @@ class CommandHandler
 		int		handle_command(Client *client, std::string cmd, Server *server);
 		int		log_in(Client *client, std::string cmd);
 		int		parse_cmd(std::string cmd);
-		int		exec_cmd(int cmd, Client *client, Server *server);
+		int		exec_cmd(int cmd, Client *client, Server *server, std::string str);
 		int		nickFun(std::vector<std::string> args, Client *client);
 		int		joinFun(std::vector<std::string> args, Client *client, std::vector<Channel *> *channels);
 		void	setNewChannel(Client *client, Channel *new_channel, std::string channel_name);

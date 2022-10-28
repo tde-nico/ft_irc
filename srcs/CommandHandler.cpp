@@ -19,7 +19,7 @@ int	CommandHandler::handle_command(Client *client, std::string cmd, Server *serv
 		return (this->log_in(client, cmd));
 	else if (client->getStatus() == 1) // logged
 	{
-		ret = exec_cmd(parse_cmd(cmd), client, server);
+		ret = exec_cmd(parse_cmd(cmd), client, server, cmd);
 		if (ret == 0)
 		{
 			sprintf(_msg, "Unknown command : %s", cmd.c_str());
@@ -99,24 +99,48 @@ int		CommandHandler::parse_cmd(std::string cmd)
 	return (0);
 }
 
-int	CommandHandler::exec_cmd(int cmd, Client *client, Server *server)
+int	CommandHandler::exec_cmd(int cmd, Client *client, Server *server, std::string str)
 {
-	
-	//return 1 if a cmd it's found or 0 if not
-	switch (cmd)
+	if (client->getChannelmode() == ON)
 	{
-	case nick : return nickFun(this->_splitted_cmd, client); 
-	case join : return joinFun(this->_splitted_cmd, client, server->get_channels());
-	case part : console_log("CMD: comando scelto part");return 1;
-	case set_nick : console_log("CMD: comando scelto set nick");return 1;
-	case whois : console_log("CMD: comando scelto  whois");return 1;
-	case msg : console_log("CMD: comando scelto  msg");return 1;
-	case kick : console_log("CMD: comando scelto set kick");return 1;
-	case ban : console_log("CMD: comando scelto  ban");return 1;
-	case EXIT : return 2;
+		size_t i = 0;
+		size_t end = server->get_channels()->size();
+		
+		std::cout << "NOME CANALE " << client->getNameChannel() << "\n";
 
-	default: console_log("CMD: Command not found");
-	break;
+		while (i < end)
+		{
+			//trovo il canale
+			if (strcmp(server->get_channels()->at(i)->get_nameChannel().c_str(), client->getNameChannel().c_str()) == 0)
+			{
+				//trovo i membri del canale
+				size_t z = 0;
+				while (server->get_channels()->at(i)->get_users()->size() > z)
+					send(server->get_channels()->at(i)->get_users()->at(z++)->getFd(), str.c_str(), strlen(str.c_str()), 0);
+				break;
+			}
+			i++;
+		}
+		return (1);
+	}
+	else
+	{
+		//return 1 if a cmd it's found or 0 if not
+		switch (cmd)
+		{
+		case nick : return nickFun(this->_splitted_cmd, client); 
+		case join : return joinFun(this->_splitted_cmd, client, server->get_channels());
+		case part : console_log("CMD: comando scelto part");return 1;
+		case set_nick : console_log("CMD: comando scelto set nick");return 1;
+		case whois : console_log("CMD: comando scelto  whois");return 1;
+		case msg : console_log("CMD: comando scelto  msg");return 1;
+		case kick : console_log("CMD: comando scelto set kick");return 1;
+		case ban : console_log("CMD: comando scelto  ban");return 1;
+		case EXIT : return 2;
+
+		default: console_log("CMD: Command not found");
+		break;
+	}
 	}
 	
 	return 0;
