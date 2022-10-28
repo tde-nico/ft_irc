@@ -6,6 +6,7 @@ Client::Client(int fd, std::string hostname, int port)
 	this->hostname = hostname;
 	this->port = port;
 	this->status = 0;
+	this->ChannelMode = 0;
 }
 
 Client::~Client() {}

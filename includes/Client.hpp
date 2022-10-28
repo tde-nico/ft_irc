@@ -5,6 +5,9 @@
 
 #include "utils.hpp"
 
+#define ON 42
+#define OFF 19
+
 class Client
 {
 	private:
@@ -20,6 +23,7 @@ class Client
 		// 1: logged
 		// 2: admin
 		int			status;
+		int			ChannelMode;
 
 	public:
 		Client(int fd, std::string hostname, int port);
@@ -32,6 +36,7 @@ class Client
 		std::string	getUsername() const { return (username); }
 		std::string	getRealname() const { return (realname); }
 		int			getStatus() const { return (status); }
+		int			getChannelmode(){ return (this->ChannelMode); }
 		
 		void		setFd(int fd) { this->fd = fd; }
 		void		setHostname(std::string hostname) { this->hostname = hostname; }
@@ -40,6 +45,7 @@ class Client
 		void		setUsername(std::string username) { this->username = username; }
 		void		setRealname(std::string realname) { this->realname = realname; }
 		void		setStatus(int status) { this->status = status; }
+		void		setChannelmode(int mode) { this->ChannelMode = mode; }
 
 		void		printUserInfo(){std::cout << "nickname: " << getNickname() << "\n";}
 		std::string	identify();

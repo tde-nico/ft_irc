@@ -8,6 +8,7 @@ Server::Server(std::string const &port, std::string const &password)
 	this->running = 1;
 	this->sock = this->create_socket();
 	this->handler = new CommandHandler((this), password);
+	this->channels = new std::vector<Channel*>;
 	console_log("Main Socket Created");
 }
 
@@ -163,7 +164,7 @@ int	Server::handle_message(int fd)
 	}
 	// command handling
 	Client	*client = this->clients.at(fd);
-	if (this->handler->handle_command(client, _msg))
+	if (this->handler->handle_command(client, _msg, this))
 	{
 		this->handle_disconnection(client->getFd());
 		return (1);

@@ -1,4 +1,6 @@
 #include "CommandHandler.hpp"
+#include "Channel.hpp"
+#include "Server.hpp"
 
 CommandHandler::CommandHandler(Server *server, std::string const &password)
 {
@@ -8,7 +10,7 @@ CommandHandler::CommandHandler(Server *server, std::string const &password)
 
 CommandHandler::~CommandHandler() {}
 
-int	CommandHandler::handle_command(Client *client, std::string cmd)
+int	CommandHandler::handle_command(Client *client, std::string cmd, Server *server)
 {
 	char		_msg[100];
 	int			ret;
@@ -17,7 +19,7 @@ int	CommandHandler::handle_command(Client *client, std::string cmd)
 		return (this->log_in(client, cmd));
 	else if (client->getStatus() == 1) // logged
 	{
-		ret = exec_cmd(parse_cmd(cmd), client);
+		ret = exec_cmd(parse_cmd(cmd), client, server);
 		if (ret == 0)
 		{
 			sprintf(_msg, "Unknown command : %s", cmd.c_str());
@@ -97,13 +99,14 @@ int		CommandHandler::parse_cmd(std::string cmd)
 	return (0);
 }
 
-int	CommandHandler::exec_cmd(int cmd, Client *client)
+int	CommandHandler::exec_cmd(int cmd, Client *client, Server *server)
 {
+	
 	//return 1 if a cmd it's found or 0 if not
 	switch (cmd)
 	{
 	case nick : return nickFun(this->_splitted_cmd, client); 
-	case join : console_log("CMD: comando scelto join");return 1;
+	case join : return joinFun(this->_splitted_cmd, client, server->get_channels());
 	case part : console_log("CMD: comando scelto part");return 1;
 	case set_nick : console_log("CMD: comando scelto set nick");return 1;
 	case whois : console_log("CMD: comando scelto  whois");return 1;

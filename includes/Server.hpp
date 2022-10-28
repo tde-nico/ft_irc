@@ -16,10 +16,12 @@
 #include <cerrno>
 
 class Server;
+class Channel;
 
 #include "utils.hpp"
 #include "Client.hpp"
 #include "CommandHandler.hpp"
+#include "Channel.hpp"
 
 #define MAX_CONNECTIONS 200
 
@@ -27,7 +29,7 @@ class Server;
 class ServerQuitException: public std::exception
 {
 	public:
-		std::string	what() { return ("Quitting from server"); }
+	//	std::string	what() { return ("Quitting from server"); }
 };
 
 class Server
@@ -41,7 +43,7 @@ class Server
 		std::vector<pollfd>		poll_fds;
 		std::map<int, Client *>	clients;
 		CommandHandler			*handler;
-
+		std::vector<Channel*> 	*channels;
 	public:
 		Server(std::string const &port, std::string const &password);
 		~Server();
@@ -52,6 +54,7 @@ class Server
 		std::string	recive(int fd);
 		int			handle_message(int fd);
 		void		handle_disconnection(int fd);
+		std::vector<Channel*>	*get_channels(){return this->channels;};
 };
 
 #endif

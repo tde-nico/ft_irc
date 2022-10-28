@@ -7,6 +7,7 @@ class CommandHandler;
 
 #include "utils.hpp"
 #include "Client.hpp"
+#include "Channel.hpp"
 #include "Server.hpp"
 
 #define WRONG_PASS "Wrong Password, Try again.\n"
@@ -35,12 +36,16 @@ class CommandHandler
 		CommandHandler(Server *server, std::string const &password);
 		~CommandHandler();
 
-		int		handle_command(Client *client, std::string cmd);
+		int		handle_command(Client *client, std::string cmd, Server *server);
 		int		log_in(Client *client, std::string cmd);
 		int		parse_cmd(std::string cmd);
-		int		exec_cmd(int cmd, Client *client);
+		int		exec_cmd(int cmd, Client *client, Server *server);
 		int		nickFun(std::vector<std::string> args, Client *client);
-
+		int		joinFun(std::vector<std::string> args, Client *client, std::vector<Channel *> *channels);
+		void	setNewChannel(Client *client, Channel *new_channel, std::string channel_name);
+		std::string	getwelcomeMessage(Channel *new_channel);
+		void	joinChannel(Client *client, Channel *channel);
+		std::string		get_time();
 };
 
 #endif
