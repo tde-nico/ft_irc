@@ -6,8 +6,6 @@ Client::Client(int fd, std::string hostname, int port)
 	this->hostname = hostname;
 	this->port = port;
 	this->status = 0;
-	this->ChannelMode = OFF;
-
 }
 
 Client::~Client() {}
@@ -30,4 +28,10 @@ std::string	Client::log(std::string const &log)
 	sprintf(tmp, "%s %s", this->identify().c_str(), log.c_str());
 	msg.append(tmp);
 	return (msg);
+}
+
+void	Client::reply(std::string const &msg)
+{
+	if (send(this->fd, msg.c_str(), strlen(msg.c_str()), 0) < 0)
+		throw std::runtime_error("Error while sending");
 }

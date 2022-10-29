@@ -3,11 +3,10 @@
 
 #pragma once
 
-#include "utils.hpp"
+class Client;
 
-#define ON 42
-#define ON_SECOND_ENTRY 43
-#define OFF 19
+#include "utils.hpp"
+#include "Server.hpp"
 
 class Client
 {
@@ -19,14 +18,11 @@ class Client
 		std::string	nickname;
 		std::string	username;
 		std::string	realname;
-		std::string prefix;
 
 		// 0: not logged
 		// 1: logged
 		// 2: admin
 		int			status;
-		int			ChannelMode;
-		std::string	channelNameLogged;
 
 	public:
 		Client(int fd, std::string hostname, int port);
@@ -39,9 +35,6 @@ class Client
 		std::string	getUsername() const { return (username); }
 		std::string	getRealname() const { return (realname); }
 		int			getStatus() const { return (status); }
-		int			getChannelmode(){ return (this->ChannelMode); }
-		std::string	getNameChannel() const { return (this->channelNameLogged); }
-		std::string	getPrefix() const { return (this->prefix); }
 		
 		void		setFd(int fd) { this->fd = fd; }
 		void		setHostname(std::string hostname) { this->hostname = hostname; }
@@ -50,13 +43,11 @@ class Client
 		void		setUsername(std::string username) { this->username = username; }
 		void		setRealname(std::string realname) { this->realname = realname; }
 		void		setStatus(int status) { this->status = status; }
-		void		setChannelmode(int mode) { this->ChannelMode = mode; }
-		void		setChannelName(std::string str) { this->channelNameLogged = str; }
-		void		setPrefix(std::string str) {this->prefix = "["; prefix.append(str) ;prefix.append("]");};
 
 		void		printUserInfo(){std::cout << "nickname: " << getNickname() << "\n";}
 		std::string	identify();
 		std::string	log(std::string const &log);
+		void		reply(std::string const &msg);
 };
 
 

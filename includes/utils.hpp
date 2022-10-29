@@ -9,7 +9,9 @@
 #include <cstring>
 #include <cstdio>
 #include <vector>
+#include <map>
 
+#define MAC_OS 1
 
 inline void	console_log(std::string const &msg)
 {

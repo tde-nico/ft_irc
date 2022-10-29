@@ -8,8 +8,6 @@ Server::Server(std::string const &port, std::string const &password)
 	this->running = 1;
 	this->sock = this->create_socket();
 	this->handler = new CommandHandler((this), password);
-	this->channels = new std::vector<Channel*>;
-	this->clients = new std::map<int, Client *>;
 	console_log("Main Socket Created");
 }
 
@@ -18,7 +16,7 @@ Server::~Server()
 	std::vector<int> fds;
 
 	// disconnect all clients
-	for (std::map<int, Client *>::iterator it = this->clients->begin(); it != this->clients->end(); ++it)
+	for (std::map<int, Client *>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
 		fds.push_back(it->second->getFd());
 	for (int fd = 0; fd != (int)fds.size(); ++fd)
 		this->handle_disconnection(fds[fd]);
@@ -31,6 +29,8 @@ Server::~Server()
 void	handle_sigint(int sig)
 {
 	(void)sig;
+	if (MAC_OS)
+		exit(0);
 	throw ServerQuitException();
 }
 
@@ -70,10 +70,6 @@ void	Server::start()
 				this->handle_disconnection(it->fd);
 				break ;
 			}
-			// send ChannelPrefix
-			if (this->clients->at(it->fd)->getChannelmode() == ON  || \
-			this->clients->at(it->fd)->getChannelmode() == ON_SECOND_ENTRY)
-				printChannelPrefix(it);
 		}
 	}
 }
@@ -119,9 +115,6 @@ void	Server::handle_connection()
 	fd = accept(this->sock, (sockaddr *)&addr, &size);
 	if (fd < 0)
 		throw std::runtime_error("Error while accepting new client");
-	// request the password at the client
-	if (send(fd, INSERT_PASS, strlen(INSERT_PASS), 0) == -1)
-		throw std::runtime_error("Error while requesting the password");
 	// save th client's fd
 	pollfd	poll_fd = {fd, POLLIN, 0};
 	this->poll_fds.push_back(poll_fd);
@@ -130,7 +123,9 @@ void	Server::handle_connection()
 		throw std::runtime_error("Error while gathering client informations");
 	// create a new client
 	Client *new_client = new Client(fd, inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
-	this->clients->insert(std::make_pair(fd, new_client));
+	this->clients.insert(std::make_pair(fd, new_client));
+	// request the password at the client
+	new_client->reply(INSERT_PASS);
 	// log new connection
 	console_log(new_client->log("has connected"));
 }
@@ -163,13 +158,13 @@ int	Server::handle_message(int fd)
 	std::string _msg = this->recive(fd);
 	// if disconnected
 	if (_msg[0] == 0)
-	{		
+	{
 		this->handle_disconnection(fd);
 		return (1);
 	}
 	// command handling
-	Client	*client = this->clients->at(fd);
-	if (this->handler->handle_command(client, _msg, this))
+	Client	*client = this->clients.at(fd);
+	if (this->handler->handle_command(client, _msg))
 	{
 		this->handle_disconnection(client->getFd());
 		return (1);
@@ -181,12 +176,12 @@ void	Server::handle_disconnection(int fd)
 {
 	try
 	{
-		Client	*client = this->clients->at(fd);
+		Client	*client = this->clients.at(fd);
 
 		// message of disconnection
 		console_log(client->log("has disconnected"));
 		// remove the client
-		this->clients->erase(fd);
+		this->clients.erase(fd);
 		for (std::vector<pollfd>::iterator it = poll_fds.begin(); it != poll_fds.end(); ++it)
 		{
 			if (it->fd != fd)
@@ -198,25 +193,5 @@ void	Server::handle_disconnection(int fd)
 		delete client;
 	}
 	catch (std::out_of_range const &err) {}
-}
-
-void					Server::printChannelPrefix(std::vector<pollfd>::iterator it)
-{
-	size_t z = this->get_channels()->at(0)->get_users()->size();
-	size_t i;
-	std::cout << "size member channel group :" << z << "\n";
-
-	this->clients->at(it->fd)->setPrefix(this->clients->at(it->fd)->getNickname());
-	for (i = 0; i < z; i++)
-	{
-		if (this->clients->at(it->fd)->getChannelmode() == ON_SECOND_ENTRY)
-		{
-		this->clients->at(it->fd)->setPrefix(channels->at(0)->get_users()->at(i)->getNickname());
-		send(channels->at(0)->get_users()->at(i)->getFd(), this->clients->at(it->fd)->getPrefix().c_str(),\
-		strlen(this->clients->at(it->fd)->getPrefix().c_str()), 0);
-		}
-	}
-	if (z == i)
-		this->clients->at(it->fd)->setChannelmode(ON_SECOND_ENTRY);
 }
 
