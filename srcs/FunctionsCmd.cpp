@@ -100,14 +100,9 @@ void            CommandHandler::setNewChannel(Client *client, Channel *new_chann
 
 void	CommandHandler::joinChannel(Client *client, Channel *channel)
 {
-    client->setChannelmode(ON);
+    if (client->getChannelmode() == OFF)
+        client->setChannelmode(ON);
     client->setChannelName(channel->get_nameChannel());
-   // if (send(client->getFd(), getwelcomeMessage(channel).c_str(), strlen(getwelcomeMessage(channel).c_str()), 0) == -1)
-     //       throw std::runtime_error("Error while sending Welcome Message");
- //   if (client->getChannelmode() == ON)
- //   {
-        //MANDA IL PREFISSO DEL CANALE ED IL TUO NOME A TUTTI I PARTECIPANTI DEL CANALE
-        //ciclare gli utenti del canale e mandare il messaggio solo ai partecipanti
-
-  //  }
+    if (send(client->getFd(), getwelcomeMessage(channel).c_str(), strlen(getwelcomeMessage(channel).c_str()), 0) == -1)
+            throw std::runtime_error("Error while sending Welcome Message");
 }

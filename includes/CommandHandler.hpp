@@ -31,6 +31,7 @@ class CommandHandler
 		Server						*server;
 		std::string					password;
 		std::vector<std::string>	_splitted_cmd;
+		std::string                 prefix;
 
 	public:
 		CommandHandler(Server *server, std::string const &password);
@@ -45,6 +46,7 @@ class CommandHandler
 		void	setNewChannel(Client *client, Channel *new_channel, std::string channel_name);
 		std::string	getwelcomeMessage(Channel *new_channel);
 		void	joinChannel(Client *client, Channel *channel);
+		void	sendToChannel(Channel *channel, std::string str, Client *client);
 		std::string		get_time();
 };
 

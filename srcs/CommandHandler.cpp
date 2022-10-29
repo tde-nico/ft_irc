@@ -6,6 +6,7 @@ CommandHandler::CommandHandler(Server *server, std::string const &password)
 {
 	this->server = server; // remove if not used
 	this->password = password;
+	this->prefix.append("[");
 }
 
 CommandHandler::~CommandHandler() {}
@@ -101,22 +102,18 @@ int		CommandHandler::parse_cmd(std::string cmd)
 
 int	CommandHandler::exec_cmd(int cmd, Client *client, Server *server, std::string str)
 {
-	if (client->getChannelmode() == ON)
+	//if u are in a channel send all messages only
+	//to channel's member
+	if (client->getChannelmode() == ON || client->getChannelmode() == ON_SECOND_ENTRY)
 	{
 		size_t i = 0;
 		size_t end = server->get_channels()->size();
-		
-		std::cout << "NOME CANALE " << client->getNameChannel() << "\n";
-
 		while (i < end)
 		{
 			//trovo il canale
 			if (strcmp(server->get_channels()->at(i)->get_nameChannel().c_str(), client->getNameChannel().c_str()) == 0)
 			{
-				//trovo i membri del canale
-				size_t z = 0;
-				while (server->get_channels()->at(i)->get_users()->size() > z)
-					send(server->get_channels()->at(i)->get_users()->at(z++)->getFd(), str.c_str(), strlen(str.c_str()), 0);
+				sendToChannel(server->get_channels()->at(i), str, client);
 				break;
 			}
 			i++;
@@ -144,4 +141,21 @@ int	CommandHandler::exec_cmd(int cmd, Client *client, Server *server, std::strin
 	}
 	
 	return 0;
+}
+
+void	CommandHandler::sendToChannel(Channel *channel, std::string str, Client *client)
+{
+	size_t z = 0;
+	std::string prefix = "[";
+	prefix.append(this->get_time());
+	prefix.append("] ");
+	prefix.append("@");
+	prefix.append(client->getNickname());
+	prefix.append(": ");
+	prefix.append(str);
+	while (channel->get_users()->size() > z)
+	{
+		send(channel->get_users()->at(z)->getFd(), prefix.c_str(), strlen(prefix.c_str()), 0);
+		z++;
+	}
 }

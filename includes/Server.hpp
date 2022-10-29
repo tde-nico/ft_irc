@@ -38,6 +38,7 @@ class Server
 		std::string				host;
 		std::string				port;
 		std::string				password;
+
 		int						sock;
 		int						running;
 		std::vector<pollfd>		poll_fds;
@@ -48,14 +49,15 @@ class Server
 		Server(std::string const &port, std::string const &password);
 		~Server();
 
-		void		start();
-		int			create_socket();
-		void		handle_connection();
-		std::string	recive(int fd);
-		int			handle_message(int fd);
-		void		handle_disconnection(int fd);
+		void					start();
+		int						create_socket();
+		void					handle_connection();
+		std::string				recive(int fd);
+		int						handle_message(int fd);
+		void					handle_disconnection(int fd);
 		std::vector<Channel*>	*get_channels(){return this->channels;};
 		std::map<int, Client *> *get_clients(){return this->clients;}
+		void					printChannelPrefix(std::vector<pollfd>::iterator it);
 };
 
 #endif

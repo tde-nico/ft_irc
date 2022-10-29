@@ -6,6 +6,7 @@
 #include "utils.hpp"
 
 #define ON 42
+#define ON_SECOND_ENTRY 43
 #define OFF 19
 
 class Client
@@ -18,6 +19,7 @@ class Client
 		std::string	nickname;
 		std::string	username;
 		std::string	realname;
+		std::string prefix;
 
 		// 0: not logged
 		// 1: logged
@@ -39,6 +41,7 @@ class Client
 		int			getStatus() const { return (status); }
 		int			getChannelmode(){ return (this->ChannelMode); }
 		std::string	getNameChannel() const { return (this->channelNameLogged); }
+		std::string	getPrefix() const { return (this->prefix); }
 		
 		void		setFd(int fd) { this->fd = fd; }
 		void		setHostname(std::string hostname) { this->hostname = hostname; }
@@ -49,6 +52,7 @@ class Client
 		void		setStatus(int status) { this->status = status; }
 		void		setChannelmode(int mode) { this->ChannelMode = mode; }
 		void		setChannelName(std::string str) { this->channelNameLogged = str; }
+		void		setPrefix(std::string str) {this->prefix = "["; prefix.append(str) ;prefix.append("]");};
 
 		void		printUserInfo(){std::cout << "nickname: " << getNickname() << "\n";}
 		std::string	identify();

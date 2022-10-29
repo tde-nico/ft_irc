@@ -33,9 +33,6 @@ class Channel
             void                        set_currentFd(int fd){this->currentFD = fd;};
             void                        set_hostname(std::string str){this->hostname = str;};
             void                        set_admin(std::string str){this->admin = str;};
-          //  void                        setNewChannel(Client *client, Channel *new_channel, std::string channel_name);
-          //  void                        getwelcomeMessage();
-          //  std::string		        get_time();
 };
 
 

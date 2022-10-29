@@ -70,6 +70,10 @@ void	Server::start()
 				this->handle_disconnection(it->fd);
 				break ;
 			}
+			// send ChannelPrefix
+			if (this->clients->at(it->fd)->getChannelmode() == ON  || \
+			this->clients->at(it->fd)->getChannelmode() == ON_SECOND_ENTRY)
+				printChannelPrefix(it);
 		}
 	}
 }
@@ -159,7 +163,7 @@ int	Server::handle_message(int fd)
 	std::string _msg = this->recive(fd);
 	// if disconnected
 	if (_msg[0] == 0)
-	{
+	{		
 		this->handle_disconnection(fd);
 		return (1);
 	}
@@ -194,5 +198,25 @@ void	Server::handle_disconnection(int fd)
 		delete client;
 	}
 	catch (std::out_of_range const &err) {}
+}
+
+void					Server::printChannelPrefix(std::vector<pollfd>::iterator it)
+{
+	size_t z = this->get_channels()->at(0)->get_users()->size();
+	size_t i;
+	std::cout << "size member channel group :" << z << "\n";
+
+	this->clients->at(it->fd)->setPrefix(this->clients->at(it->fd)->getNickname());
+	for (i = 0; i < z; i++)
+	{
+		if (this->clients->at(it->fd)->getChannelmode() == ON_SECOND_ENTRY)
+		{
+		this->clients->at(it->fd)->setPrefix(channels->at(0)->get_users()->at(i)->getNickname());
+		send(channels->at(0)->get_users()->at(i)->getFd(), this->clients->at(it->fd)->getPrefix().c_str(),\
+		strlen(this->clients->at(it->fd)->getPrefix().c_str()), 0);
+		}
+	}
+	if (z == i)
+		this->clients->at(it->fd)->setChannelmode(ON_SECOND_ENTRY);
 }
 
