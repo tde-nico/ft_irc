@@ -11,6 +11,13 @@ CommandHandler::CommandHandler(Server *server, std::string const &password)
 	this->commands["/quit"] = new QuitCommand(server);
 	this->commands["/list"] = new ListCommand(server);
 	this->commands["/nick"] = new NickCommand(server);
+	this->commands["/kick"] = new KickCommand(server, 1);
+	this->commands["/help"] = new HelpCommand(server);
+	// TODO possible commands
+	console_log("TODO /whois command");
+	console_log("TODO /msg command");
+	console_log("TODO /ban command (auth = 1)");
+	console_log("TODO /unban command (auth = 1)");
 }
 
 CommandHandler::~CommandHandler()

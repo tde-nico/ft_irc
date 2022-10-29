@@ -11,7 +11,7 @@ class CommandHandler;
 #include "Command.hpp"
 
 #define WRONG_PASS "Wrong Password, Try again.\n"
-#define CORRECT_PASS "Welcome Back.\n"
+#define CORRECT_PASS "Welcome, Please set your nickname.\n"
 #define INSERT_PASS "Please insert the password: "
 
 

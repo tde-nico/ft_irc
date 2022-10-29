@@ -25,47 +25,68 @@ class Command
 
 class ExitCommand : public Command
 {
-public:
-	ExitCommand(Server *server, int auth = 0);
-	~ExitCommand();
+	public:
+		ExitCommand(Server *server, int auth = 0);
+		~ExitCommand();
 
-	void execute(Client *client, std::vector<std::string> args);
+		void execute(Client *client, std::vector<std::string> args);
 };
 
 class JoinCommand : public Command
 {
-public:
-	JoinCommand(Server *server, int auth = 0);
-	~JoinCommand();
+	public:
+		JoinCommand(Server *server, int auth = 0);
+		~JoinCommand();
 
-	void execute(Client *client, std::vector<std::string> args);
+		void execute(Client *client, std::vector<std::string> args);
 };
 
 class QuitCommand : public Command
 {
-public:
-	QuitCommand(Server *server, int auth = 0);
-	~QuitCommand();
+	public:
+		QuitCommand(Server *server, int auth = 0);
+		~QuitCommand();
 
-	void execute(Client *client, std::vector<std::string> args);
+		void execute(Client *client, std::vector<std::string> args);
 };
 
 class ListCommand : public Command
 {
-public:
-	ListCommand(Server *server, int auth = 0);
-	~ListCommand();
+	public:
+		ListCommand(Server *server, int auth = 0);
+		~ListCommand();
 
-	void execute(Client *client, std::vector<std::string> args);
+		void execute(Client *client, std::vector<std::string> args);
 };
 
 class NickCommand : public Command
 {
-public:
-	NickCommand(Server *server, int auth = 0);
-	~NickCommand();
+	public:
+		NickCommand(Server *server, int auth = 0);
+		~NickCommand();
 
-	void execute(Client *client, std::vector<std::string> args);
+		void execute(Client *client, std::vector<std::string> args);
+};
+
+class KickCommand : public Command
+{
+	public:
+		KickCommand(Server *server, int auth = 1);
+		~KickCommand();
+
+		void execute(Client *client, std::vector<std::string> args);
+};
+
+class HelpCommand : public Command
+{
+	private:
+		std::map<std::string, std::string>	help;
+
+	public:
+		HelpCommand(Server *server, int auth = 0);
+		~HelpCommand();
+
+		void execute(Client *client, std::vector<std::string> args);
 };
 
 #endif

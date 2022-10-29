@@ -56,9 +56,13 @@ void	Channel::removeClient(Client *client)
 
 void	Channel::kick(Client *client, Client *target)
 {
+	std::string	reply;
 	std::string	msg;
 
-	msg.append(" kicked ").append(target->getNickname());
-	console_log(client->log(msg));
 	removeClient(target);
+	reply.append("you have been kicked out from ").append(this->name);
+	reply.append(" by ").append(client->getNickname()).append("\n");
+	target->reply(reply);
+	msg.append("kicked ").append(target->getNickname());
+	console_log(client->log(msg));
 }

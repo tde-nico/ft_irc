@@ -19,7 +19,10 @@ Server::~Server()
 	for (std::map<int, Client *>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
 		fds.push_back(it->second->getFd());
 	for (int fd = 0; fd != (int)fds.size(); ++fd)
+	{
+		this->clients[fds[fd]]->reply("Shutting down the server\n");
 		this->handle_disconnection(fds[fd]);
+	}
 	// delete all channels
 	for (int channel = 0; channel != (int)this->channels.size(); ++channel)
 		delete this->channels.at(channel);
