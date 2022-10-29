@@ -15,9 +15,7 @@ int	main(int argc, char **argv)
 	}
 	catch (ServerQuitException &err)
 	{
-		std::string	tmp;
-		tmp.append(err.what());
-		console_log(tmp);
+		console_log(err.err());
 	}
 	catch (std::exception &err)
 	{

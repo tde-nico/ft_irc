@@ -11,7 +11,7 @@
 #include <vector>
 #include <map>
 
-#define MAC_OS 1
+#define MAC_OS 0
 
 inline void	console_log(std::string const &msg)
 {
@@ -26,6 +26,21 @@ inline void	console_log(std::string const &msg)
 	std::string now(buffer);
 	std::cout << "[" << now << "] " << msg << "\n";
 }
+
+
+const class nullptr_t
+{
+	public:
+		template<class T>
+		operator T*() const { return (0); }
+
+		template<class C, class T>
+			operator T C::*() const { return (0); }	
+
+	private:
+		void operator&() const;
+
+} nullp = {};
 
 
 #endif

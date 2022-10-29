@@ -19,6 +19,7 @@ class Server;
 #include "utils.hpp"
 #include "Client.hpp"
 #include "CommandHandler.hpp"
+#include "Channel.hpp"
 
 #define MAX_CONNECTIONS 200
 
@@ -26,7 +27,7 @@ class Server;
 class ServerQuitException: public std::exception
 {
 	public:
-		virtual const char	*what() const throw ()  { return (((std::string)"Quitting from server").c_str()); }
+		std::string	err() { return ("Quitting from server"); }
 };
 
 class Server
@@ -39,6 +40,7 @@ class Server
 		int						running;
 		std::vector<pollfd>		poll_fds;
 		std::map<int, Client *>	clients;
+		std::vector<Channel *>	channels;
 		CommandHandler			*handler;
 
 	public:
@@ -51,6 +53,9 @@ class Server
 		std::string	recive(int fd);
 		int			handle_message(int fd);
 		void		handle_disconnection(int fd);
+		Channel		*createChannel(std::string const &name, Client *client);
+		Channel		*getChannel(std::string const &name);
+		Client		*getClient(std::string const &name);
 };
 
 #endif

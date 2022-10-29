@@ -7,6 +7,7 @@ class Client;
 
 #include "utils.hpp"
 #include "Server.hpp"
+#include "Channel.hpp"
 
 class Client
 {
@@ -23,18 +24,20 @@ class Client
 		// 1: logged
 		// 2: admin
 		int			status;
+		Channel		*channel;
 
 	public:
 		Client(int fd, std::string hostname, int port);
 		~Client();
 
-		int			getFd() const { return (fd); }
-		std::string	getHostname() const { return (hostname); }
-		int			getPort() const { return (port); }
-		std::string	getNickname() const { return (nickname); }
-		std::string	getUsername() const { return (username); }
-		std::string	getRealname() const { return (realname); }
-		int			getStatus() const { return (status); }
+		int			getFd() const { return (this->fd); }
+		std::string	getHostname() const { return (this->hostname); }
+		int			getPort() const { return (this->port); }
+		std::string	getNickname() const { return (this->nickname); }
+		std::string	getUsername() const { return (this->username); }
+		std::string	getRealname() const { return (this->realname); }
+		int			getStatus() const { return (this->status); }
+		Channel		*getChannel() const { return (this->channel); }
 		
 		void		setFd(int fd) { this->fd = fd; }
 		void		setHostname(std::string hostname) { this->hostname = hostname; }
@@ -43,11 +46,13 @@ class Client
 		void		setUsername(std::string username) { this->username = username; }
 		void		setRealname(std::string realname) { this->realname = realname; }
 		void		setStatus(int status) { this->status = status; }
+		void		setChannel(Channel *channel) { this->channel = channel; }
 
-		void		printUserInfo(){std::cout << "nickname: " << getNickname() << "\n";}
 		std::string	identify();
 		std::string	log(std::string const &log);
 		void		reply(std::string const &msg);
+		void		join(Channel *channel);
+		void		leave();
 };
 
 

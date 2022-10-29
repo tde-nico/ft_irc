@@ -1,9 +1,3 @@
-splitter cmd
-
-executioner cmd
-
 channels
-
-admin
 
 bonus ?

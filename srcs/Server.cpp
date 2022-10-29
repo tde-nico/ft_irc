@@ -20,6 +20,9 @@ Server::~Server()
 		fds.push_back(it->second->getFd());
 	for (int fd = 0; fd != (int)fds.size(); ++fd)
 		this->handle_disconnection(fds[fd]);
+	// delete all channels
+	for (int channel = 0; channel != (int)this->channels.size(); ++channel)
+		delete this->channels.at(channel);
 	// clean memory
 	delete this->handler;
 	close(this->sock);
@@ -29,8 +32,6 @@ Server::~Server()
 void	handle_sigint(int sig)
 {
 	(void)sig;
-	if (MAC_OS)
-		exit(0);
 	throw ServerQuitException();
 }
 
@@ -39,7 +40,8 @@ void	Server::start()
 	pollfd	server_fd = {this->sock, POLLIN, 0};
 	poll_fds.push_back(server_fd);
 
-	signal(SIGINT, handle_sigint);
+	if (!MAC_OS)
+		signal(SIGINT, handle_sigint);
 	console_log("Server waiting for connections");
 
 	while (this->running)
@@ -107,8 +109,7 @@ void	Server::handle_connection()
 	int			fd;
 	sockaddr_in	addr = {};
 	socklen_t 	size;
-	std::string	pass;
-	std::string	tmp_pass;
+	std::string	ip_addr;
 
 	// accept connection
 	size = sizeof(addr);
@@ -119,10 +120,11 @@ void	Server::handle_connection()
 	pollfd	poll_fd = {fd, POLLIN, 0};
 	this->poll_fds.push_back(poll_fd);
 	// get client info
+	ip_addr = inet_ntoa(addr.sin_addr);
 	if (getsockname(fd, (struct sockaddr *)&addr, &size) != 0)
 		throw std::runtime_error("Error while gathering client informations");
 	// create a new client
-	Client *new_client = new Client(fd, inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+	Client *new_client = new Client(fd, ip_addr, ntohs(addr.sin_port));
 	this->clients.insert(std::make_pair(fd, new_client));
 	// request the password at the client
 	new_client->reply(INSERT_PASS);
@@ -195,3 +197,33 @@ void	Server::handle_disconnection(int fd)
 	catch (std::out_of_range const &err) {}
 }
 
+Client	*Server::getClient(std::string const &name)
+{
+	std::map<int, Client *>::iterator it;
+
+	for (it = this->clients.begin(); it != this->clients.end(); ++it)
+	{
+		if (!name.compare(it->second->getNickname()))
+			return (it->second);
+	}
+	return (nullp);
+}
+
+Channel	*Server::getChannel(std::string const &name)
+{
+	std::vector<Channel *>::iterator it;
+
+	for (it = this->channels.begin(); it != this->channels.end(); ++it)
+	{
+		if (!name.compare(it.operator*()->getName()))
+			return (it.operator*());
+	}
+	return (nullp);
+}
+
+Channel	*Server::createChannel(std::string const &name, Client *client)
+{
+	Channel	*channel = new Channel(name, client);
+	this->channels.push_back(channel);
+	return (channel);
+}
