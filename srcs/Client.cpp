@@ -44,14 +44,16 @@ void	Client::join(Channel *channel)
 	std::string					msg;
 
 	channel->addClient((this));
+	this->channel = channel;
 	users = channel->getNicknames();
 	for (std::vector<std::string>::iterator it = users.begin(); it != users.end(); ++it)
 		users_string.append((*it)).append(" ");
 	users_string.append("\n");
 	this->reply(users_string);
-	msg = this->log(" has joined ").append(channel->getName()).append(" as ").append(this->nickname);
-	channel->broadcast(msg);
+	msg = this->log("has joined ").append(channel->getName()).append(" as ").append(this->nickname);
 	console_log(msg);
+	msg.append("\n");
+	channel->broadcast(msg);
 }
 
 void	Client::leave()

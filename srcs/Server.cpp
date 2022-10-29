@@ -180,8 +180,8 @@ void	Server::handle_disconnection(int fd)
 	{
 		Client	*client = this->clients.at(fd);
 
-		// message of disconnection
-		console_log(client->log("has disconnected"));
+		// remove the client from the channel
+		client->leave();
 		// remove the client
 		this->clients.erase(fd);
 		for (std::vector<pollfd>::iterator it = poll_fds.begin(); it != poll_fds.end(); ++it)
@@ -192,6 +192,8 @@ void	Server::handle_disconnection(int fd)
 			close(fd);
 			break ;
 		}
+		// message of disconnection
+		console_log(client->log("has disconnected"));
 		delete client;
 	}
 	catch (std::out_of_range const &err) {}

@@ -4,7 +4,6 @@ Channel::Channel(std::string const &name, Client *client)
 {
 	this->name = name;
 	client->setStatus(2);
-	this->clients.push_back(client);
 }
 
 Channel::~Channel() {}
@@ -37,13 +36,22 @@ void	Channel::addClient(Client *client)
 
 void	Channel::removeClient(Client *client)
 {
-	std::string	msg;
+	std::vector<Client *>::iterator	it;
+	std::string						msg;
 
-	//this->clients.erase(std::remove(this->clients.begin(), this->clients.end(), client), this->clients.end());
+	for (it = this->clients.begin(); it != this->clients.end(); ++it)
+	{
+		if ((*it) == client)
+		{
+			this->clients.erase(it);
+			break ;
+		}
+	}
 	client->setChannel(nullp);
-	msg.append(client->getNickname()).append(" quitted from ").append(this->name);
-	this->broadcast(msg);
+	msg.append(client->log(client->getNickname())).append(" quitted from ").append(this->name);
 	console_log(msg);
+	msg.append("\n");
+	this->broadcast(msg);
 }
 
 void	Channel::kick(Client *client, Client *target)

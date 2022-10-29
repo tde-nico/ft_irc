@@ -7,7 +7,10 @@ CommandHandler::CommandHandler(Server *server, std::string const &password)
 	
 	// commands
 	this->commands["/exit"] = new ExitCommand(server);
-	this->commands["/a"] = new ExitCommand(server, 1);
+	this->commands["/join"] = new JoinCommand(server);
+	this->commands["/quit"] = new QuitCommand(server);
+	this->commands["/list"] = new ListCommand(server);
+	this->commands["/nick"] = new NickCommand(server);
 }
 
 CommandHandler::~CommandHandler()
@@ -93,6 +96,13 @@ int	CommandHandler::exec_cmd(std::string cmd, Client *client)
 		}
 		catch (const std::out_of_range &err)
 		{
+			// handle normal message
+			Channel *channel = client->getChannel();
+			if (channel != nullp)
+			{
+				channel->broadcast(cmd, client);
+				continue ;
+			}
 			// error when searching for command
 			msg.append("Unknown Command : ").append(name).append("\n");
 			client->reply(msg);
