@@ -12,11 +12,21 @@ void	KickCommand::execute(Client *client, std::vector<std::string> args)
 		return ;
 	}
 	Channel	*channel = client->getChannel();
+	if (channel == nullp)
+	{
+		client->reply("You are not in a channel\n");
+		return ;
+	}
 	Client	*target;
 	for (int i = 0; i != (int)args.size(); ++i)
 	{
 		target = this->server->getClient(args.at(i));
 		if (target != nullp)
-			channel->kick(client, target);
+		{
+			if (target == client)
+				client->reply("You cannot kick yourself\n");
+			else
+				channel->kick(client, target);
+		}
 	}
 }

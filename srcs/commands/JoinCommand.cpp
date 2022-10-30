@@ -20,6 +20,6 @@ void	JoinCommand::execute(Client *client, std::vector<std::string> args)
 	}
 	channel = this->server->getChannel(name);
 	if (channel == nullp)
-		channel = this->server->createChannel(name, client);
+		channel = this->server->createChannel(name);
 	client->join(channel);
 }

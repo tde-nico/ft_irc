@@ -1,3 +1,7 @@
-commands
+whois
+msg
+ban
+unban
 
-bonus ?
+bot
+file transfer

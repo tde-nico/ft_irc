@@ -16,7 +16,7 @@ class Channel
 		std::vector<Client *>	clients;
 
 	public:
-		Channel(std::string const &name, Client *client);
+		Channel(std::string const &name);
 		~Channel();
 
 		std::string					getName() const { return (this->name); }

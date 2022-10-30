@@ -11,8 +11,10 @@ CommandHandler::CommandHandler(Server *server, std::string const &password)
 	this->commands["/quit"] = new QuitCommand(server);
 	this->commands["/list"] = new ListCommand(server);
 	this->commands["/nick"] = new NickCommand(server);
-	this->commands["/kick"] = new KickCommand(server, 1);
+	this->commands["/user"] = new UserCommand(server);
 	this->commands["/help"] = new HelpCommand(server);
+	// admin commands
+	this->commands["/kick"] = new KickCommand(server, 1);
 	// TODO possible commands
 	console_log("TODO /whois command");
 	console_log("TODO /msg command");
@@ -105,7 +107,7 @@ int	CommandHandler::exec_cmd(std::string cmd, Client *client)
 		{
 			// handle normal message
 			Channel *channel = client->getChannel();
-			if (channel != nullp)
+			if (channel != nullp && name[0] != '/')
 			{
 				channel->broadcast(cmd, client);
 				continue ;

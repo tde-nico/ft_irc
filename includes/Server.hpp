@@ -53,7 +53,7 @@ class Server
 		std::string				recive(int fd);
 		int						handle_message(int fd);
 		void					handle_disconnection(int fd);
-		Channel					*createChannel(std::string const &name, Client *client);
+		Channel					*createChannel(std::string const &name);
 		Channel					*getChannel(std::string const &name);
 		std::vector<Channel *>	getChannels() { return (this->channels); }
 		Client					*getClient(std::string const &name);

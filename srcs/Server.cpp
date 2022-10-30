@@ -226,9 +226,9 @@ Channel	*Server::getChannel(std::string const &name)
 	return (nullp);
 }
 
-Channel	*Server::createChannel(std::string const &name, Client *client)
+Channel	*Server::createChannel(std::string const &name)
 {
-	Channel	*channel = new Channel(name, client);
+	Channel	*channel = new Channel(name);
 	this->channels.push_back(channel);
 	return (channel);
 }

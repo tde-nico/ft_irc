@@ -7,6 +7,8 @@ Client::Client(int fd, std::string hostname, int port)
 	this->port = port;
 	this->status = 0;
 	this->channel = nullp;
+	this->nickname = "Marvin";
+	this->username = hostname;
 }
 
 Client::~Client() {}

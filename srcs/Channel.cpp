@@ -1,9 +1,8 @@
 #include "Channel.hpp"
 
-Channel::Channel(std::string const &name, Client *client)
+Channel::Channel(std::string const &name)
 {
 	this->name = name;
-	client->setStatus(2);
 }
 
 Channel::~Channel() {}
@@ -32,6 +31,8 @@ void	Channel::broadcast(std::string const &msg, Client *except)
 void	Channel::addClient(Client *client)
 {
 	this->clients.push_back(client);
+	if (this->clients.size() == 1)
+		client->setStatus(2);
 }
 
 void	Channel::removeClient(Client *client)
@@ -52,6 +53,19 @@ void	Channel::removeClient(Client *client)
 	console_log(msg);
 	msg.append("\n");
 	this->broadcast(msg);
+	if (client->getStatus() == 2)
+	{
+		msg = "";
+		client->setStatus(1);
+		if (this->clients.size() > 0)
+		{
+			this->clients.at(0)->setStatus(2);
+			msg.append(this->clients.at(0)->getNickname()).append(" is now the admin of ").append(this->name);
+			console_log(msg);
+			msg.append("\n");
+			this->broadcast(msg);
+		}
+	}
 }
 
 void	Channel::kick(Client *client, Client *target)

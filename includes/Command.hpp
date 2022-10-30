@@ -68,6 +68,15 @@ class NickCommand : public Command
 		void execute(Client *client, std::vector<std::string> args);
 };
 
+class UserCommand : public Command
+{
+	public:
+		UserCommand(Server *server, int auth = 0);
+		~UserCommand();
+
+		void execute(Client *client, std::vector<std::string> args);
+};
+
 class KickCommand : public Command
 {
 	public:
