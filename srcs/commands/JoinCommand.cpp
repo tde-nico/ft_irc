@@ -6,20 +6,32 @@ JoinCommand::~JoinCommand() {}
 
 void	JoinCommand::execute(Client *client, std::vector<std::string> args)
 {
-	if ((int)args.size() != 1)
+	if (args.empty())
 	{
-		client->reply("Wrong number of arguments\n");
+		client->msgReply(ERR_NEEDMOREPARAMS(client->getNickname(), "PASS"));
 		return ;
 	}
 	std::string	name = args.at(0);
+	std::string	password = "";
+	if (args.size() > 1)
+		std::string	password = args.at(1);
+
 	Channel	*channel = client->getChannel();
 	if (channel != nullp)
 	{
-		client->reply("You are already in a channel\n");
+		client->msgReply(ERR_TOOMANYCHANNELS(client->getNickname(), name));
 		return ;
 	}
+
 	channel = this->server->getChannel(name);
 	if (channel == nullp)
-		channel = this->server->createChannel(name);
+		channel = this->server->createChannel(name, password);
+	
+	if (password.compare(channel->getPassword()))
+	{
+		client->msgReply(ERR_BADCHANNELKEY(client->getNickname(), name));
+		return ;
+	}
+	
 	client->join(channel);
 }

@@ -7,8 +7,6 @@ Client::Client(int fd, std::string hostname, int port)
 	this->port = port;
 	this->status = 0;
 	this->channel = nullp;
-	this->nickname = "Marvin";
-	this->username = hostname;
 }
 
 Client::~Client() {}
@@ -33,34 +31,62 @@ std::string	Client::log(std::string const &log)
 	return (msg);
 }
 
-void	Client::reply(std::string const &msg)
+void	Client::reply(std::string const &msg) const
 {
-	if (send(this->fd, msg.c_str(), strlen(msg.c_str()), 0) < 0)
+	std::string	tmp = msg + "\r\n";
+	console_log(msg); // DEBUG
+	if (send(this->fd, tmp.c_str(), tmp.length(), 0) < 0)
 		throw std::runtime_error("Error while sending");
+}
+
+void	Client::msgReply(std::string const &msg)
+{
+	this->reply(":" + this->getPrefix() + " " + msg);
+}
+
+void	Client::welcome()
+{
+	if (!this->status || this->username.empty() || this->realname.empty() || this->nickname.empty())
+		return ;
+	this->msgReply(RPL_WELCOME(this->nickname));
+	console_log(this->log("is known as " + this->nickname));
 }
 
 void	Client::join(Channel *channel)
 {
 	std::string					users_string;
 	std::vector<std::string>	users;
-	std::string					msg;
 
 	channel->addClient((this));
 	this->channel = channel;
 	users = channel->getNicknames();
 	for (std::vector<std::string>::iterator it = users.begin(); it != users.end(); ++it)
 		users_string.append((*it)).append(" ");
-	users_string.append("\n");
-	this->reply(users_string);
-	msg = this->log("has joined ").append(channel->getName()).append(" as ").append(this->nickname);
-	console_log(msg);
-	msg.append("\n");
-	channel->broadcast(msg);
+	
+	this->msgReply(RPL_NAMREPLY(this->nickname, channel->getName(), users_string));
+	this->msgReply(RPL_ENDOFNAMES(this->nickname, channel->getName()));
+	
+	channel->broadcast(RPL_JOIN(this->getPrefix(), channel->getName()));
+	console_log(this->nickname + " has joined channel " + channel->getName());
 }
 
 void	Client::leave()
 {
 	if (this->channel == nullp)
 		return ;
+	this->channel->broadcast(RPL_PART(this->getPrefix(), this->channel->getName()));
+	console_log(this->nickname + " has left channel " + channel->getName());
 	this->channel->removeClient((this));
+}
+
+std::string	Client::getPrefix() const
+{
+	std::string	tmp;
+
+	tmp = this->nickname;
+	if (!this->username.empty())
+		tmp.append("!").append(this->username);
+	if (!this->hostname.empty())
+		tmp.append("@").append(this->hostname);
+	return (tmp);
 }

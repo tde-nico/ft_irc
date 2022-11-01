@@ -6,27 +6,42 @@ KickCommand::~KickCommand() {}
 
 void	KickCommand::execute(Client *client, std::vector<std::string> args)
 {
-	if ((int)args.size() < 1)
+	if ((int)args.size() < 2)
 	{
-		client->reply("Wrong number of arguments\n");
+		client->msgReply(ERR_NEEDMOREPARAMS(client->getNickname(), "KICK"));
 		return ;
 	}
+
+	std::string	name = args.at(0);
+	std::string	target = args.at(1);
+	std::string	reason = "No reason specified";
+
+	if (args.size() >= 3 && (args[2][0] != ':' || args[2].size() > 1))
+	{
+		reason = "";
+		for (std::vector<std::string>::iterator it = args.begin() + 2; it != args.end(); it++)
+			reason.append(*it + " ");
+	}
+
 	Channel	*channel = client->getChannel();
-	if (channel == nullp)
+	if (channel == nullp || channel->getName() != name)
 	{
-		client->reply("You are not in a channel\n");
+		client->msgReply(ERR_NOTONCHANNEL(client->getNickname(), name));
 		return ;
 	}
-	Client	*target;
-	for (int i = 0; i != (int)args.size(); ++i)
+
+	Client	*dst = this->server->getClient(target);
+	if (dst == nullp)
 	{
-		target = this->server->getClient(args.at(i));
-		if (target != nullp)
-		{
-			if (target == client)
-				client->reply("You cannot kick yourself\n");
-			else
-				channel->kick(client, target);
-		}
+		client->msgReply(ERR_NOSUCHNICK(client->getNickname(), target));
+		return;
 	}
+
+	if (dst->getChannel() == nullp || dst->getChannel() != channel)
+	{
+		client->msgReply(ERR_USERNOTINCHANNEL(client->getNickname(), dst->getNickname(), name));
+		return;
+	}
+
+	channel->kick(client, dst, reason);
 }

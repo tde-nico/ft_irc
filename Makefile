@@ -81,7 +81,7 @@ bonus: all
 
 test: all
 	clear
-	@./$(NAME) $(PORT) $(PASSWORD)
+	@ ./$(NAME) $(PORT) $(PASSWORD)
 
 run: test
 rrun: fclean test

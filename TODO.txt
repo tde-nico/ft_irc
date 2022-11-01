@@ -1,7 +1,8 @@
-whois
-msg
-ban
-unban
 
-bot
-file transfer
+# Optional
+ - mode
+ - who
+
+# Bonus
+ - bot
+ - file transfer

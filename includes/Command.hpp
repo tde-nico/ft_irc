@@ -23,20 +23,29 @@ class Command
 		virtual void	execute(Client *client, std::vector<std::string> args) = 0;
 };
 
-class ExitCommand : public Command
+class NoticeCommand : public Command
 {
 	public:
-		ExitCommand(Server *server, int auth = 0);
-		~ExitCommand();
+		NoticeCommand(Server *server, int auth = 0);
+		~NoticeCommand();
 
 		void execute(Client *client, std::vector<std::string> args);
 };
 
-class JoinCommand : public Command
+class PrivMsgCommand : public Command
 {
 	public:
-		JoinCommand(Server *server, int auth = 0);
-		~JoinCommand();
+		PrivMsgCommand(Server *server, int auth = 0);
+		~PrivMsgCommand();
+
+		void execute(Client *client, std::vector<std::string> args);
+};
+
+class PartCommand : public Command
+{
+	public:
+		PartCommand(Server *server, int auth = 0);
+		~PartCommand();
 
 		void execute(Client *client, std::vector<std::string> args);
 };
@@ -50,20 +59,11 @@ class QuitCommand : public Command
 		void execute(Client *client, std::vector<std::string> args);
 };
 
-class ListCommand : public Command
+class JoinCommand : public Command
 {
 	public:
-		ListCommand(Server *server, int auth = 0);
-		~ListCommand();
-
-		void execute(Client *client, std::vector<std::string> args);
-};
-
-class NickCommand : public Command
-{
-	public:
-		NickCommand(Server *server, int auth = 0);
-		~NickCommand();
+		JoinCommand(Server *server, int auth = 0);
+		~JoinCommand();
 
 		void execute(Client *client, std::vector<std::string> args);
 };
@@ -77,6 +77,25 @@ class UserCommand : public Command
 		void execute(Client *client, std::vector<std::string> args);
 };
 
+class NickCommand : public Command
+{
+	public:
+		NickCommand(Server *server, int auth = 0);
+		~NickCommand();
+
+		void execute(Client *client, std::vector<std::string> args);
+};
+
+
+class PassCommand : public Command
+{
+	public:
+		PassCommand(Server *server, int auth = 0);
+		~PassCommand();
+
+		void execute(Client *client, std::vector<std::string> args);
+};
+
 class KickCommand : public Command
 {
 	public:
@@ -86,14 +105,20 @@ class KickCommand : public Command
 		void execute(Client *client, std::vector<std::string> args);
 };
 
-class HelpCommand : public Command
+class PingCommand : public Command
 {
-	private:
-		std::map<std::string, std::string>	help;
-
 	public:
-		HelpCommand(Server *server, int auth = 0);
-		~HelpCommand();
+		PingCommand(Server *server, int auth = 0);
+		~PingCommand();
+
+		void execute(Client *client, std::vector<std::string> args);
+};
+
+class PongCommand : public Command
+{
+	public:
+		PongCommand(Server *server, int auth = 0);
+		~PongCommand();
 
 		void execute(Client *client, std::vector<std::string> args);
 };

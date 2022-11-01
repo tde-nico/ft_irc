@@ -6,8 +6,19 @@ NickCommand::~NickCommand() {}
 
 void NickCommand::execute(Client *client, std::vector<std::string> args)
 {
-	if (args.size() == 0)
-		client->reply(client->getNickname().append("\n"));
-	else
-		client->setNickname(args.at(0));
+	if (args.empty() || args.at(0).empty())
+	{
+		client->msgReply(ERR_NONICKNAMEGIVEN(client->getNickname()));
+		return;
+	}
+
+	std::string	nickname = args.at(0);
+
+	if (this->server->getClient(nickname))
+	{
+		client->msgReply(ERR_NICKNAMEINUSE(client->getNickname()));
+		return;
+	}
+	client->setNickname(nickname);
+	client->welcome();
 }

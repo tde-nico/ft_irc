@@ -1,25 +1,22 @@
 #include "CommandHandler.hpp"
 
-CommandHandler::CommandHandler(Server *server, std::string const &password)
+CommandHandler::CommandHandler(Server *server)
 {
-	this->server = server; // remove if not used
-	this->password = password;
+	this->server = server;
+
+	this->commands["PASS"] = new PassCommand(server, 0);
+	this->commands["NICK"] = new NickCommand(server, 0);
+	this->commands["USER"] = new UserCommand(server, 0);
+	this->commands["QUIT"] = new QuitCommand(server, 0);
 	
-	// commands
-	this->commands["/exit"] = new ExitCommand(server);
-	this->commands["/join"] = new JoinCommand(server);
-	this->commands["/quit"] = new QuitCommand(server);
-	this->commands["/list"] = new ListCommand(server);
-	this->commands["/nick"] = new NickCommand(server);
-	this->commands["/user"] = new UserCommand(server);
-	this->commands["/help"] = new HelpCommand(server);
-	// admin commands
-	this->commands["/kick"] = new KickCommand(server, 1);
-	// TODO possible commands
-	console_log("TODO /whois command");
-	console_log("TODO /msg command");
-	console_log("TODO /ban command (auth = 1)");
-	console_log("TODO /unban command (auth = 1)");
+	this->commands["PING"] = new PingCommand(server, 1);
+	this->commands["PONG"] = new PongCommand(server, 1);
+	this->commands["JOIN"] = new JoinCommand(server, 1);
+	this->commands["PART"] = new PartCommand(server, 1);
+	this->commands["PRIVMSG"] = new PrivMsgCommand(server, 1);
+	this->commands["NOTICE"] = new NoticeCommand(server, 1);
+
+	this->commands["KICK"] = new KickCommand(server, 2);
 }
 
 CommandHandler::~CommandHandler()
@@ -31,37 +28,6 @@ CommandHandler::~CommandHandler()
 }
 
 int	CommandHandler::handle_command(Client *client, std::string cmd)
-{
-	if (client->getStatus() == 0) // not logged
-		return (this->log_in(client, cmd));
-	else if (client->getStatus()) // logged
-		return (exec_cmd(cmd, client));
-	return (0);
-}
-
-int	CommandHandler::log_in(Client *client, std::string cmd)
-{
-	std::string	pass;
-
-	// password check
-	pass.append(this->password).append("\n");
-	if (cmd.compare(pass))
-	{
-		// wrong password
-		client->reply(WRONG_PASS);
-		client->reply(INSERT_PASS);
-		console_log(client->log("failed to log"));
-		return (0);
-	}
-	// successful log in
-	client->reply(CORRECT_PASS);
-	// set the status to logged
-	client->setStatus(1);
-	console_log(client->log("has logged in"));
-	return (0);
-}
-
-int	CommandHandler::exec_cmd(std::string cmd, Client *client)
 {
 	std::stringstream	ss_cmd(cmd);
 	std::string			parsed;
@@ -87,37 +53,25 @@ int	CommandHandler::exec_cmd(std::string cmd, Client *client)
 			std::string					arg;
 
 			// if he has no authorization
-			if (client->getStatus() == 1 && command->getAuth() == 1) // admin check
+			if (client->getStatus() < command->getAuth()) // auth check
 			{
-				msg.append("Command Denied : ").append(name).append("\n");
-				client->reply(msg);
-				console_log(client->log(msg.substr(0, msg.length() -1)));
+				if (!client->getStatus())
+					client->msgReply(ERR_NOTREGISTERED(client->getNickname()));
+				else
+					client->msgReply(ERR_CHANOPRIVSNEEDED(client->getNickname(), client->getChannel()->getName()));
 				return (0);
 			}
 			// get the args
 			while (ss_args >> arg)
 				args.push_back(arg);
-			// log the command
-			msg.append("Executed: ").append(name);
-			console_log(client->log(msg));
 			// execute the command
 			command->execute(client, args);
 		}
 		catch (const std::out_of_range &err)
 		{
-			// handle normal message
-			Channel *channel = client->getChannel();
-			if (channel != nullp && name[0] != '/')
-			{
-				channel->broadcast(cmd, client);
-				continue ;
-			}
-			// error when searching for command
-			msg.append("Unknown Command : ").append(name).append("\n");
-			client->reply(msg);
-			console_log(client->log(msg.substr(0, msg.length() -1)));
+			client->msgReply(ERR_UNKNOWNCOMMAND(client->getNickname(), name));
 		}
-		if (!name.compare("/exit"))
+		if (!name.compare("QUIT"))
 			return (1);
 	}
 	return (0);

@@ -1,8 +1,9 @@
 #include "Channel.hpp"
 
-Channel::Channel(std::string const &name)
+Channel::Channel(std::string const &name, std::string const &password)
 {
 	this->name = name;
+	this->password = password;
 }
 
 Channel::~Channel() {}
@@ -40,6 +41,7 @@ void	Channel::removeClient(Client *client)
 	std::vector<Client *>::iterator	it;
 	std::string						msg;
 
+	// remove the client
 	for (it = this->clients.begin(); it != this->clients.end(); ++it)
 	{
 		if ((*it) == client)
@@ -49,34 +51,26 @@ void	Channel::removeClient(Client *client)
 		}
 	}
 	client->setChannel(nullp);
-	msg.append(client->log(client->getNickname())).append(" quitted from ").append(this->name);
-	console_log(msg);
-	msg.append("\n");
-	this->broadcast(msg);
+	// set status
 	if (client->getStatus() == 2)
 	{
-		msg = "";
 		client->setStatus(1);
 		if (this->clients.size() > 0)
 		{
 			this->clients.at(0)->setStatus(2);
 			msg.append(this->clients.at(0)->getNickname()).append(" is now the admin of ").append(this->name);
 			console_log(msg);
-			msg.append("\n");
-			this->broadcast(msg);
 		}
 	}
 }
 
-void	Channel::kick(Client *client, Client *target)
+void	Channel::kick(Client *client, Client *target, std::string const &reason)
 {
-	std::string	reply;
-	std::string	msg;
+	std::string	tmp;
 
-	removeClient(target);
-	reply.append("you have been kicked out from ").append(this->name);
-	reply.append(" by ").append(client->getNickname()).append("\n");
-	target->reply(reply);
-	msg.append("kicked ").append(target->getNickname());
-	console_log(client->log(msg));
+	this->broadcast(RPL_KICK(client->getPrefix(), this->name, target->getNickname(), reason));
+	this->removeClient(target);
+
+	tmp = client->getNickname() + " kicked" + target->getNickname() + " form channel " + this->name;
+	console_log(tmp);
 }

@@ -7,8 +7,7 @@ Server::Server(std::string const &port, std::string const &password)
 	this->password = password;
 	this->running = 1;
 	this->sock = this->create_socket();
-	this->handler = new CommandHandler((this), password);
-	console_log("Main Socket Created");
+	this->handler = new CommandHandler((this));
 }
 
 Server::~Server()
@@ -20,7 +19,7 @@ Server::~Server()
 		fds.push_back(it->second->getFd());
 	for (int fd = 0; fd != (int)fds.size(); ++fd)
 	{
-		this->clients[fds[fd]]->reply("Shutting down the server\n");
+		this->clients[fds[fd]]->msgReply("Shutting down the server\n");
 		this->handle_disconnection(fds[fd]);
 	}
 	// delete all channels
@@ -129,15 +128,13 @@ void	Server::handle_connection()
 	// create a new client
 	Client *new_client = new Client(fd, ip_addr, ntohs(addr.sin_port));
 	this->clients.insert(std::make_pair(fd, new_client));
-	// request the password at the client
-	new_client->reply(INSERT_PASS);
 	// log new connection
 	console_log(new_client->log("has connected"));
 }
 
 std::string	Server::recive(int fd)
 {
-	std::string	_msg;
+	std::string	msg;
 	char		buffer[100];
 
 	bzero(buffer, 100);
@@ -153,23 +150,24 @@ std::string	Server::recive(int fd)
 		// clear buffer means exit (UNIX)
 		if (!buffer[0])
 			return ("");
-		_msg.append(buffer);
+		msg.append(buffer);
 	}
-	return (_msg);
+	return (msg);
 }
 
 int	Server::handle_message(int fd)
 {
-	std::string _msg = this->recive(fd);
+	std::string msg = this->recive(fd);
+	console_log(msg); // DEBUG
 	// if disconnected
-	if (_msg[0] == 0)
+	if (msg[0] == 0)
 	{
 		this->handle_disconnection(fd);
 		return (1);
 	}
 	// command handling
 	Client	*client = this->clients.at(fd);
-	if (this->handler->handle_command(client, _msg))
+	if (this->handler->handle_command(client, msg))
 	{
 		this->handle_disconnection(client->getFd());
 		return (1);
@@ -226,9 +224,9 @@ Channel	*Server::getChannel(std::string const &name)
 	return (nullp);
 }
 
-Channel	*Server::createChannel(std::string const &name)
+Channel	*Server::createChannel(std::string const &name, std::string const &password)
 {
-	Channel	*channel = new Channel(name);
+	Channel	*channel = new Channel(name, password);
 	this->channels.push_back(channel);
 	return (channel);
 }

@@ -13,19 +13,21 @@ class Channel
 {
 	private:
 		std::string				name;
+		std::string				password;
 		std::vector<Client *>	clients;
 
 	public:
-		Channel(std::string const &name);
+		Channel(std::string const &name, std::string const &password);
 		~Channel();
 
 		std::string					getName() const { return (this->name); }
+		std::string					getPassword() const { return (this->password); }
 
 		std::vector<std::string>	getNicknames();
 		void						broadcast(std::string const &msg, Client *except = nullp);
 		void						addClient(Client *client);
 		void						removeClient(Client *client);
-		void						kick(Client *client, Client *target);
+		void						kick(Client *client, Client *target, std::string const &reason);
 
 };
 

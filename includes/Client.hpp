@@ -50,9 +50,12 @@ class Client
 
 		std::string	identify();
 		std::string	log(std::string const &log);
-		void		reply(std::string const &msg);
+		void		reply(std::string const &msg) const;
+		void		msgReply(std::string const &msg);
+		void		welcome();
 		void		join(Channel *channel);
 		void		leave();
+		std::string	getPrefix() const;
 };
 
 
