@@ -6,7 +6,7 @@ IrcBot::IrcBot(std::string const &host, std::string const &port, std::string con
 	std::istringstream(port) >> this->port;
 	this->password = password;
 	this->sock = this->createSocket();
-	this->name = "Marvin";
+	this->nickname = "Marvin";
 }
 
 IrcBot::~IrcBot()
@@ -40,38 +40,21 @@ void	IrcBot::reply(std::string const &msg)
 {
 	std::string	to_send;
 
-	console_log(msg);
-	to_send.append(msg).append("\n");
+	console_log(msg); // DEBUG
+	to_send.append(msg).append("\r\n");
 	send(this->sock, to_send.c_str(), to_send.size(), 0);
+}
+
+void	IrcBot::sendPrivMsg(std::string const &source, std::string const &msg)
+{
+	this->reply("PRIVMSG " + source + " :" + msg);
 }
 
 void	IrcBot::login()
 {
-	std::string	msg;
-	char		buffer[1024];
-	int			length;
-	std::string	tmp;
-
-	length = recv(this->sock, buffer, 1024, 0);
-	buffer[length] = '\0';
-	console_log((std::string)(buffer));
-	this->reply(this->password);
-	length = recv(this->sock, buffer, 1024, 0);
-	buffer[length] = '\0';
-	tmp.append(buffer);
-	tmp.erase(std::remove(tmp.begin(), tmp.end(), '\n'), tmp.cend());
-	console_log(tmp);
-	msg.append("/nick ").append(this->name);
-	this->reply(msg);
-	// tmp join
-	msg = "/join bot";
-	this->reply(msg);
-	length = recv(this->sock, buffer, 1024, 0);
-	buffer[length] = '\0';
-	tmp = "";
-	tmp.append(buffer);
-	tmp.erase(std::remove(tmp.begin(), tmp.end(), '\n'), tmp.cend());
-	console_log(tmp);
+	this->reply("PASS " + this->password);
+	this->reply("NICK " + this->nickname);
+	this->reply("USER ircbot 0 * :42_irc_bot");
 }
 
 void	IrcBot::start()
@@ -91,18 +74,35 @@ void	IrcBot::handleMessage(std::string const &msg)
 {
 	std::string					tmp;
 	std::vector<std::string>	message;
+	std::string					source;
+	std::string					nickname;
+	std::string					type;
+	std::string::size_type		pos;
 
 	tmp.append(msg);
 	tmp.erase(std::remove(tmp.begin(), tmp.end(), '\n'), tmp.cend());
 	message = ft_split(tmp);
-	// replies
-	console_log(tmp);
-	if (tmp.find("has joined") <= tmp.length())
-		this->reply("Life? Don't talk to me about life");
-	else if (tmp.find("quitted from") <= tmp.length())
-		this->reply("Do you want me to sit in a corner and rust, or just fall apart where I'm standing?");
-	else if (tmp.find("idea") <= tmp.length())
-		this->reply("I have a million ideas. They all point to certain death");
+	if (message.size() < 2)
+		return ;
+	source = message.at(0);
+	type = message.at(1);
+	pos = source.find('!');
+	if (pos != std::string::npos)
+		nickname = source.substr(1, pos - 1);
 	else
-		this->reply("I think you ought to know I'm feeling very depressed");
+		nickname = source;
+	message = std::vector<std::string>(message.begin() + 2, message.end());
+	// replies
+	console_log(tmp); // DEBUG
+	if (!type.compare("PRIVMSG"))
+	{
+		std::cout << message.size() << " " << message.at(1) << "\n"; // DEBUG
+		this->sendPrivMsg(nickname, "I think you ought to know I'm feeling very depressed");
+	}
+	/*
+	"Life? Don't talk to me about life"
+	"Do you want me to sit in a corner and rust, or just fall apart where I'm standing?"
+	"I have a million ideas. They all point to certain death"
+	"I think you ought to know I'm feeling very depressed"
+	*/
 }

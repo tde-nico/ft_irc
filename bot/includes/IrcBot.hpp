@@ -21,7 +21,8 @@ class IrcBot
 		std::string	password;
 
 		int			sock;
-		std::string	name;
+
+		std::string	nickname;
 
 	public:
 		IrcBot(std::string const &host, std::string const &port, std::string const &password);
@@ -29,6 +30,7 @@ class IrcBot
 
 		int		createSocket();
 		void	reply(std::string const &msg);
+		void	sendPrivMsg(std::string const &source, std::string const &msg);
 		void	login();
 		void	start();
 		void	handleMessage(std::string const &msg);
