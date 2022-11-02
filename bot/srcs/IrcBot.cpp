@@ -70,6 +70,66 @@ void	IrcBot::start()
 	}
 }
 
+void	IrcBot::sendFile(std::string const &source, std::string const &fname, std::string const &name)
+{
+	FILE		*fd = fopen(fname.c_str(), "rb");
+	char		buffer[1024];
+	std::string	content;
+
+	// get the file's content
+	while (!feof(fd))
+	{
+		int size = fread(&buffer, 1, 1024, fd);
+		if (size < 0)
+			break;
+		content.append(buffer, size);
+	}
+	fclose(fd);
+
+	int	server_fd = socket(AF_INET, SOCK_STREAM, 0);
+	if (server_fd < 0)
+		throw std::runtime_error("Error while opening socket");
+
+	int	tmp = 1;
+	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &tmp, sizeof(tmp)))
+		throw std::runtime_error("Error while setting socket options");
+
+	struct sockaddr_in serv_address = {};
+	int serv_address_len = sizeof(serv_address);
+	bzero((char *) &serv_address, serv_address_len);
+
+	serv_address.sin_family = AF_INET;
+	serv_address.sin_addr.s_addr = INADDR_ANY;
+	serv_address.sin_port = htons(1096);
+
+	if (bind(server_fd, (struct sockaddr *) &serv_address, serv_address_len) < 0)
+		throw std::runtime_error("Error while binding socket");
+
+
+	if (listen(server_fd, 1) < 0)
+		throw std::runtime_error("Error while listening on socket");
+	std::cout << "wait\n";
+
+	this->reply("PRIVMSG " + source + " :" + '\x01' + "DCC SEND " + name + " 0 1096 " + std::to_string(content.size()+2) + '\x01');
+
+	int client_fd = accept(server_fd, (struct sockaddr *) &serv_address, (socklen_t *) &serv_address_len);
+	std::cout << client_fd << " " << server_fd << "\n";
+	if (client_fd < 0)
+	{
+		close(server_fd);
+		content.clear();
+		return ;
+	}
+	std::cout << "|"<< content << "|"  << content.c_str() << "|" << content.size() << " " << strlen(content.c_str()) << "\n";
+	int out = send(client_fd, content.c_str(), content.size() + 1, 0);
+	std::cout << out << "\n";
+
+	close(client_fd);
+	close(server_fd);
+
+	console_log("Success on sending " + fname);
+}
+
 void	IrcBot::handleMessage(std::string const &msg)
 {
 	std::string					tmp;
@@ -97,7 +157,10 @@ void	IrcBot::handleMessage(std::string const &msg)
 	if (!type.compare("PRIVMSG"))
 	{
 		std::cout << message.size() << " " << message.at(1) << "\n"; // DEBUG
-		this->sendPrivMsg(nickname, "I think you ought to know I'm feeling very depressed");
+		if (!message.at(1).compare(":get"))
+			this->sendFile(nickname, message.at(2), message.at(2));
+		else
+			this->sendPrivMsg(nickname, "I think you ought to know I'm feeling very depressed");
 	}
 	/*
 	"Life? Don't talk to me about life"

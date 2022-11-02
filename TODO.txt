@@ -4,5 +4,4 @@
  - who
 
 # Bonus
- - bot
  - file transfer
