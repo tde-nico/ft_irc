@@ -15,6 +15,7 @@ class Channel
 		std::string				name;
 		std::string				password;
 		std::vector<Client *>	clients;
+		std::vector<Client *>	*Ban;
 
 	public:
 		Channel(std::string const &name, std::string const &password);
@@ -28,7 +29,7 @@ class Channel
 		void						addClient(Client *client);
 		void						removeClient(Client *client);
 		void						kick(Client *client, Client *target, std::string const &reason);
-
+		std::vector<Client *>		*getfdBan(){return this->Ban;};
 };
 
 #endif

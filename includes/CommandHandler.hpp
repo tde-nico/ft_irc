@@ -21,6 +21,7 @@ class CommandHandler
 		~CommandHandler();
 
 		int		handle_command(Client *client, std::string cmd);
+		int		exec_cmd(std::string cmd, Client *client);
 
 };
 
