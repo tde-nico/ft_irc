@@ -13,6 +13,10 @@ int	main(int argc, char **argv)
 		IrcBot bot(argv[1], argv[2], argv[3]);
 		bot.start();
 	}
+	catch (BotQuitException &err)
+	{
+		(void)err;
+	}
 	catch (std::exception &err)
 	{
 		std::cout << "Error: " << err.what() << "\n";

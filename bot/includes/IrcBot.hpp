@@ -9,9 +9,17 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <string>
+#include <algorithm>
 #include <sstream>
+#include <signal.h>
 
 #include "utils.hpp"
+
+class BotQuitException: public std::exception
+{
+	public:
+		std::string	err() { return ("Quitting from the bot"); }
+};
 
 class IrcBot
 {

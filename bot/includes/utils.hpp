@@ -9,6 +9,8 @@
 #include <cstdio>
 #include <vector>
 
+#define MAC_OS 0
+#define DEBUG 0
 
 inline void	console_log(std::string const &msg)
 {

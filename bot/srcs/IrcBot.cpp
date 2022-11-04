@@ -52,6 +52,8 @@ void	IrcBot::reply(std::string const &msg)
 
 void	IrcBot::sendPrivMsg(std::string const &source, std::string const &msg)
 {
+	if (DEBUG)
+		console_log(msg);
 	this->reply("PRIVMSG " + source + " :" + msg);
 }
 
@@ -63,11 +65,19 @@ void	IrcBot::login()
 	console_log("Logged on server");
 }
 
+void	handle_sigint(int sig)
+{
+	(void)sig;
+	throw BotQuitException();
+}
+
 void	IrcBot::start()
 {
 	char	buffer[1024];
 	int		length;
 
+	if (!MAC_OS)
+		signal(SIGINT, handle_sigint);
 	this->login();
 	while ((length = recv(this->sock, buffer, 1024, 0)) > 0)
 	{
@@ -116,7 +126,9 @@ void	IrcBot::sendFile(std::string const &source, std::string const &fname, std::
 		throw std::runtime_error("Error while binding socket");
 
 	// send the dcc request
-	this->reply("PRIVMSG " + source + " :" + '\x01' + "DCC SEND " + name + " " + this->ip + " 1096 " + std::to_string(content.size()));
+	std::stringstream	size;
+	size << content.size();
+	this->reply("PRIVMSG " + source + " :" + '\x01' + "DCC SEND " + name + " " + this->ip + " 1096 " + size.str());
 
 	// listen for connections
 	if (listen(server_fd, 1) < 0)
@@ -131,6 +143,28 @@ void	IrcBot::sendFile(std::string const &source, std::string const &fname, std::
 		return ;
 	}
 
+	/*std::string			packet;
+	long unsigned int	curr;
+	curr = 0;
+	while (curr < content.size())
+	{
+		if (content.size() - curr < 32768)
+			packet = content.substr(curr, content.size());
+		else
+			packet = content.substr(curr, curr + 32768);
+
+		// send the data
+		if (send(client_fd, packet.c_str(), packet.size(), 0) < 0)
+			throw std::runtime_error("Error while sending");
+
+		// recive the acknoledgement
+		if (recv(client_fd, buffer, 32768, 0) < 0)
+			throw std::runtime_error("Error while reciving");
+		
+		curr += 32768;
+	}*/
+
+
 	// send the data
 	if (send(client_fd, content.c_str(), content.size(), 0) < 0)
 		throw std::runtime_error("Error while sending");
@@ -138,6 +172,7 @@ void	IrcBot::sendFile(std::string const &source, std::string const &fname, std::
 	// recive the acknoledgement
 	if (recv(client_fd, buffer, 1024, 0) < 0)
 		throw std::runtime_error("Error while reciving");
+
 
 	// close connections
 	close(client_fd);
@@ -156,7 +191,9 @@ void	IrcBot::handleMessage(std::string const &msg)
 	std::string::size_type		pos;
 
 	tmp.append(msg);
-	tmp.erase(std::remove(tmp.begin(), tmp.end(), '\n'), tmp.cend());
+	tmp.erase(std::remove(tmp.begin(), tmp.end(), '\n'), tmp.end());
+	if (DEBUG)
+		console_log(tmp);
 	message = ft_split(tmp);
 	if (message.size() < 2)
 		return ;
