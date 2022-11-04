@@ -21,6 +21,7 @@ class IrcBot
 		std::string	password;
 
 		int			sock;
+		std::string	ip;
 
 		std::string	nickname;
 

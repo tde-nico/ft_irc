@@ -27,11 +27,17 @@ int	IrcBot::createSocket()
 	struct sockaddr_in addr = {};
 	bzero((char *)&addr, sizeof(addr));
 	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = INADDR_ANY;
+	addr.sin_addr.s_addr = inet_addr(this->host.c_str());
 	addr.sin_port = htons(this->port);
 	// connect to the server
 	if (connect(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
 		throw std::runtime_error("Error while connecting to the server");
+
+	// get this machine's ip
+	socklen_t	size = sizeof(addr);
+	if (getsockname(sockfd, (struct sockaddr *)&addr, &size) != 0)
+		throw std::runtime_error("Error while getting ip");
+	this->ip = inet_ntoa(addr.sin_addr);
 
 	return (sockfd);
 }
@@ -40,7 +46,6 @@ void	IrcBot::reply(std::string const &msg)
 {
 	std::string	to_send;
 
-	console_log(msg); // DEBUG
 	to_send.append(msg).append("\r\n");
 	send(this->sock, to_send.c_str(), to_send.size(), 0);
 }
@@ -55,6 +60,7 @@ void	IrcBot::login()
 	this->reply("PASS " + this->password);
 	this->reply("NICK " + this->nickname);
 	this->reply("USER ircbot 0 * :42_irc_bot");
+	console_log("Logged on server");
 }
 
 void	IrcBot::start()
@@ -86,47 +92,57 @@ void	IrcBot::sendFile(std::string const &source, std::string const &fname, std::
 	}
 	fclose(fd);
 
+
+	// create the socket
 	int	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_fd < 0)
 		throw std::runtime_error("Error while opening socket");
 
+	// set the socket options
 	int	tmp = 1;
 	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &tmp, sizeof(tmp)))
 		throw std::runtime_error("Error while setting socket options");
 
+	// set the bind otions
 	struct sockaddr_in serv_address = {};
 	int serv_address_len = sizeof(serv_address);
 	bzero((char *) &serv_address, serv_address_len);
-
 	serv_address.sin_family = AF_INET;
 	serv_address.sin_addr.s_addr = INADDR_ANY;
 	serv_address.sin_port = htons(1096);
 
+	// bind the socket
 	if (bind(server_fd, (struct sockaddr *) &serv_address, serv_address_len) < 0)
 		throw std::runtime_error("Error while binding socket");
 
+	// send the dcc request
+	this->reply("PRIVMSG " + source + " :" + '\x01' + "DCC SEND " + name + " " + this->ip + " 1096 " + std::to_string(content.size()));
 
+	// listen for connections
 	if (listen(server_fd, 1) < 0)
 		throw std::runtime_error("Error while listening on socket");
-	std::cout << "wait\n";
 
-	this->reply("PRIVMSG " + source + " :" + '\x01' + "DCC SEND " + name + " 0 1096 " + std::to_string(content.size()+2) + '\x01');
-
+	// accept the incoming connection
 	int client_fd = accept(server_fd, (struct sockaddr *) &serv_address, (socklen_t *) &serv_address_len);
-	std::cout << client_fd << " " << server_fd << "\n";
 	if (client_fd < 0)
 	{
 		close(server_fd);
 		content.clear();
 		return ;
 	}
-	std::cout << "|"<< content << "|"  << content.c_str() << "|" << content.size() << " " << strlen(content.c_str()) << "\n";
-	int out = send(client_fd, content.c_str(), content.size() + 1, 0);
-	std::cout << out << "\n";
 
+	// send the data
+	if (send(client_fd, content.c_str(), content.size(), 0) < 0)
+		throw std::runtime_error("Error while sending");
+
+	// recive the acknoledgement
+	if (recv(client_fd, buffer, 1024, 0) < 0)
+		throw std::runtime_error("Error while reciving");
+
+	// close connections
 	close(client_fd);
 	close(server_fd);
-
+	// log
 	console_log("Success on sending " + fname);
 }
 
@@ -153,10 +169,8 @@ void	IrcBot::handleMessage(std::string const &msg)
 		nickname = source;
 	message = std::vector<std::string>(message.begin() + 2, message.end());
 	// replies
-	console_log(tmp); // DEBUG
 	if (!type.compare("PRIVMSG"))
 	{
-		std::cout << message.size() << " " << message.at(1) << "\n"; // DEBUG
 		if (!message.at(1).compare(":get"))
 			this->sendFile(nickname, message.at(2), message.at(2));
 		else
