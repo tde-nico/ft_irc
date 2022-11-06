@@ -123,41 +123,4 @@ class PongCommand : public Command
 		void execute(Client *client, std::vector<std::string> args);
 };
 
-class Ban : public Command
-{
-	public:
-		Ban(Server *server, int auth = 1);
-		~Ban();
-
-		void execute(Client *client, std::vector<std::string> args);
-};
-
-class UnBan : public Command
-{
-	public:
-		UnBan(Server *server, int auth = 1);
-		~UnBan();
-
-		void execute(Client *client, std::vector<std::string> args);
-};
-
-class Msg : public Command
-{
-	public:
-		Msg(Server *server, int auth = 0);
-		~Msg();
-
-		void execute(Client *client, std::vector<std::string> args);
-};
-
-class WhoisCommand : public Command
-{
-	private:
-
-	public:
-		WhoisCommand(Server *server, int auth = 0);
-		~WhoisCommand();
-		void execute(Client *client, std::vector<std::string> args);
-};
-
 #endif

@@ -17,7 +17,6 @@ class Client
 		int			port;
 
 		std::string	nickname;
-		std::string	msg;
 		std::string	username;
 		std::string	realname;
 
@@ -57,8 +56,6 @@ class Client
 		void		join(Channel *channel);
 		void		leave();
 		std::string	getPrefix() const;
-		std::string	getMsg(){return this->msg;};
-		void		setMsg(std::string str){this->msg = str; };
 };
 
 

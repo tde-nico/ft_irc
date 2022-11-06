@@ -158,7 +158,8 @@ std::string	Server::recive(int fd)
 int	Server::handle_message(int fd)
 {
 	std::string msg = this->recive(fd);
-	console_log(msg); // DEBUG
+	if (DEBUG)
+		console_log(msg);
 	// if disconnected
 	if (msg[0] == 0)
 	{
