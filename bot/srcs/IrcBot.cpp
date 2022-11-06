@@ -86,22 +86,25 @@ void	IrcBot::start()
 	}
 }
 
-void	IrcBot::sendFile(std::string const &source, std::string const &fname, std::string const &name)
+int	IrcBot::sendFile(std::string const &source, std::string const &fname, std::string const &name)
 {
-	FILE		*fd = fopen(fname.c_str(), "rb");
-	char		buffer[1024];
-	std::string	content;
+	FILE			*fd = fopen(fname.c_str(), "rb");
+	char			buffer[1024];
+	std::string		content;
+
+	// check file exists
+	if (!fd)
+		return (1);
 
 	// get the file's content
 	while (!feof(fd))
 	{
 		int size = fread(&buffer, 1, 1024, fd);
 		if (size < 0)
-			break;
+			break ;
 		content.append(buffer, size);
 	}
 	fclose(fd);
-
 
 	// create the socket
 	int	server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -119,16 +122,16 @@ void	IrcBot::sendFile(std::string const &source, std::string const &fname, std::
 	bzero((char *) &serv_address, serv_address_len);
 	serv_address.sin_family = AF_INET;
 	serv_address.sin_addr.s_addr = INADDR_ANY;
-	serv_address.sin_port = htons(1096);
+	serv_address.sin_port = htons(8088);
 
 	// bind the socket
 	if (bind(server_fd, (struct sockaddr *) &serv_address, serv_address_len) < 0)
 		throw std::runtime_error("Error while binding socket");
 
 	// send the dcc request
-	std::stringstream	size;
-	size << content.size();
-	this->reply("PRIVMSG " + source + " :" + '\x01' + "DCC SEND " + name + " " + this->ip + " 1096 " + size.str());
+	std::stringstream	csize;
+	csize << content.size();
+	this->reply("PRIVMSG " + source + " :" + '\x01' + "DCC TSEND " + name + " " + this->ip + " 8088 " + csize.str());
 
 	// listen for connections
 	if (listen(server_fd, 1) < 0)
@@ -140,52 +143,27 @@ void	IrcBot::sendFile(std::string const &source, std::string const &fname, std::
 	{
 		close(server_fd);
 		content.clear();
-		return ;
+		return (0);
 	}
-
-	/*std::string			packet;
-	long unsigned int	curr;
-	curr = 0;
-	while (curr < content.size())
-	{
-		if (content.size() - curr < 32768)
-			packet = content.substr(curr, content.size());
-		else
-			packet = content.substr(curr, curr + 32768);
-
-		// send the data
-		if (send(client_fd, packet.c_str(), packet.size(), 0) < 0)
-			throw std::runtime_error("Error while sending");
-
-		// recive the acknoledgement
-		if (recv(client_fd, buffer, 32768, 0) < 0)
-			throw std::runtime_error("Error while reciving");
-		
-		curr += 32768;
-	}*/
-
 
 	// send the data
 	if (send(client_fd, content.c_str(), content.size(), 0) < 0)
 		throw std::runtime_error("Error while sending");
 
-	// recive the acknoledgement
-	if (recv(client_fd, buffer, 1024, 0) < 0)
-		throw std::runtime_error("Error while reciving");
-
-
 	// close connections
 	close(client_fd);
 	close(server_fd);
+
 	// log
 	console_log("Success on sending " + fname);
+
+	return (0);
 }
 
 void	IrcBot::handleMessage(std::string const &msg)
 {
 	std::string					tmp;
 	std::vector<std::string>	message;
-	std::string					source;
 	std::string					nickname;
 	std::string					type;
 	std::string::size_type		pos;
@@ -197,26 +175,31 @@ void	IrcBot::handleMessage(std::string const &msg)
 	message = ft_split(tmp);
 	if (message.size() < 2)
 		return ;
-	source = message.at(0);
+	// type
 	type = message.at(1);
-	pos = source.find('!');
+	// nickname
+	nickname = message.at(0);
+	pos = nickname.find('!');
 	if (pos != std::string::npos)
-		nickname = source.substr(1, pos - 1);
-	else
-		nickname = source;
+		nickname = nickname.substr(1, pos - 1);
+	// message
 	message = std::vector<std::string>(message.begin() + 2, message.end());
 	// replies
 	if (!type.compare("PRIVMSG"))
 	{
-		if (!message.at(1).compare(":get"))
-			this->sendFile(nickname, message.at(2), message.at(2));
+		if (!message.at(1).compare(":get") && message.size() > 2)
+		{
+			if (this->sendFile(nickname, message.at(2), message.at(2)))
+				this->sendPrivMsg(nickname, "Life? Don't talk to me about life. That file doesn't have one");
+		}
 		else
 			this->sendPrivMsg(nickname, "I think you ought to know I'm feeling very depressed");
 	}
-	/*
+}
+
+/*
 	"Life? Don't talk to me about life"
 	"Do you want me to sit in a corner and rust, or just fall apart where I'm standing?"
 	"I have a million ideas. They all point to certain death"
 	"I think you ought to know I'm feeling very depressed"
-	*/
-}
+*/
