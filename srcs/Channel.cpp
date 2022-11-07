@@ -72,7 +72,7 @@ void	Channel::kick(Client *client, Client *target, std::string const &reason)
 	this->broadcast(RPL_KICK(client->getPrefix(), this->name, target->getNickname(), reason));
 	this->removeClient(target);
 
-	tmp = client->getNickname() + " kicked" + target->getNickname() + " form channel " + this->name;
+	tmp = client->getNickname() + " kicked " + target->getNickname() + " form channel " + this->name;
 	console_log(tmp);
 }
 

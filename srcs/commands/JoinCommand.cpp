@@ -14,7 +14,7 @@ void	JoinCommand::execute(Client *client, std::vector<std::string> args)
 	std::string	name = args.at(0);
 	std::string	password = "";
 	if (args.size() > 1)
-		std::string	password = args.at(1);
+		password = args.at(1);
 
 	Channel	*channel = client->getChannel();
 	if (channel != nullp)
@@ -24,15 +24,25 @@ void	JoinCommand::execute(Client *client, std::vector<std::string> args)
 	}
 	channel = this->server->getChannel(name);
 	if (channel == nullp)
+<<<<<<< HEAD
 		channel = this->server->createChannel(name, password, client->getNickname());
 	
+=======
+		channel = this->server->createChannel(name, password);
+
+>>>>>>> 1efdb1c7460416315c8ce97e65eddc4ec4cdfeca
 	if (password.compare(channel->getPassword()))
 	{
 		client->msgReply(ERR_BADCHANNELKEY(client->getNickname(), name));
 		return ;
 	}
+<<<<<<< HEAD
 	if (channel->CheckBan(client) != 1)
 		client->join(channel);
 	else
 		client->msgReply(ERR_BADCHANNELKEY(client->getNickname(), name));
+=======
+
+	client->join(channel);
+>>>>>>> 1efdb1c7460416315c8ce97e65eddc4ec4cdfeca
 }

@@ -15,7 +15,7 @@ int	main(int argc, char **argv)
 	}
 	catch (ServerQuitException &err)
 	{
-		console_log(err.err());
+		(void)err;
 	}
 	catch (std::exception &err)
 	{

@@ -26,13 +26,12 @@
 #define ERR_NOSUCHNICK(source, nickname)				"401 " + source + " " + nickname + " :No such nick/channel"
 #define ERR_USERNOTINCHANNEL(source, nickname, channel)	"441 " + source + " " + nickname + " " + channel + " :They aren't on that channel"
 #define ERR_CHANOPRIVSNEEDED(source, channel)			"482 " + source + " " + channel + " :You're not channel operator"
-#define ERR_CHANNELISFULL(source, channel)				"471 " + source + " " + channel + " :Cannot join channel (+l)"
 #define ERR_CANNOTSENDTOCHAN(source, channel)			"404 " + source + " " + channel + " :Cannot send to channel"
 
 // numeric replies
-#define RPL_WELCOME(source)						"001 " + source + " :Welcome " + source + " to the ft_irc network"
-#define RPL_NAMREPLY(source, channel, users)	"353 " + source + " = " + channel + " :" + users
-#define RPL_ENDOFNAMES(source, channel)			"366 " + source + " " + channel + " :End of /NAMES list."
+#define RPL_WELCOME(source)							"001 " + source + " :Welcome " + source + " to the ft_irc network"
+#define RPL_NAMREPLY(source, channel, users)		"353 " + source + " = " + channel + " :" + users
+#define RPL_ENDOFNAMES(source, channel)				"366 " + source + " " + channel + " :End of /NAMES list."
 
 // command replies
 #define RPL_JOIN(source, channel)					":" + source + " JOIN :" + channel
@@ -42,10 +41,16 @@
 #define RPL_NOTICE(source, target, message)			":" + source + " NOTICE " + target + " :" + message
 #define RPL_QUIT(source, message)					":" + source + " QUIT :Quit: " + message
 #define RPL_KICK(source, channel, target, reason)	":" + source + " KICK " + channel + " " + target + " :" + reason
+<<<<<<< HEAD
 #define RPL_MODE(source, channel, modes, args)		":" + source + " MODE " + channel + " " + modes + " " + args
 #define RPL_WHOISUSER(source,nick,user,host, real_name)	 "311" + source + nick + user + host +  real_name
+=======
+
+>>>>>>> 1efdb1c7460416315c8ce97e65eddc4ec4cdfeca
 
 #define MAC_OS 0
+#define DEBUG 0
+
 
 inline void	console_log(std::string const &msg)
 {
