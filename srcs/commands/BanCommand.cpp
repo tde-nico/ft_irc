@@ -30,20 +30,15 @@ void	Ban::execute(Client *client, std::vector<std::string> args)
                 return ;
             }
         }
-    //    if (this->server->getClient(args.at(0)) == NULL)
-    //        return;
-    //    else
-     //   {
-            for (size_t i = 0; i < channel->getClients().size(); i++)
+        for (size_t i = 0; i < channel->getClients().size(); i++)
+        {
+            str = channel->getClients().at(i)->getNickname();
+            if (str.compare(args.at(0)) == 0 && str != client->getNickname())
             {
-                str = channel->getClients().at(i)->getNickname();
-                if (str.compare(args.at(0)) == 0 && str != client->getNickname())
-                {
-                    channel->getfdBan()->push_back(channel->getClients().at(i));
-                    channel->kick(client, channel->getClients().at(i), "BAN");
-                    break;
-                }
+                channel->getfdBan()->push_back(channel->getClients().at(i));
+                channel->kick(client, channel->getClients().at(i), "BAN");
+                break;
             }
-      //  }
+        }
     }
 }

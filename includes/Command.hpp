@@ -123,7 +123,6 @@ class PongCommand : public Command
 		void execute(Client *client, std::vector<std::string> args);
 };
 
-<<<<<<< HEAD
 class Ban : public Command
 {
 	public:
@@ -170,6 +169,4 @@ class Mode : public Command
 		void execute(Client *client, std::vector<std::string> args);
 };
 
-=======
->>>>>>> 1efdb1c7460416315c8ce97e65eddc4ec4cdfeca
 #endif
