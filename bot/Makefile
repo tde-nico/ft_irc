@@ -82,7 +82,7 @@ run: test
 rrun: fclean test
 
 val: all
-	valgrind --leak-check=full ./$(NAME) $(PORT) $(PASSWORD)
+	valgrind --leak-check=full ./$(NAME) $(HOST) $(PORT) $(PASSWORD)
 var: val
 
 

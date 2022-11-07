@@ -17,21 +17,22 @@ void UnBan::execute(Client *client, std::vector<std::string> args)
 	if (channel == nullp)
 		return ;
 	Client	*target;
-	for (int i = 0; i != (int)args.size(); ++i)
+	if (client->getNickname().compare(channel->getAdmin()) == 0)
 	{
-		target = this->server->getClient(args.at(i));
-		if (target != nullp)
-        {
-			std::vector<Client *>::iterator it;
-			for (it = channel->getfdBan()->begin(); it != channel->getfdBan()->end(); it++)
+			target = this->server->getClient(args.at(0));
+			if (target != nullp)
 			{
-				if ((*it)->getFd() == target->getFd())
+				std::vector<Client *>::iterator it;
+				for (it = channel->getfdBan()->begin(); it != channel->getfdBan()->end(); it++)
 				{
-					channel->getfdBan()->erase(it);
-					client->reply("unbanned \n");
+					if ((*it)->getNickname() == target->getNickname())
+					{
+						channel->broadcast(RPL_MODE((*it)->getPrefix(), channel->getName(), "-b", target->getNickname()));
+
+						channel->getfdBan()->erase(it);
+						return;
+					}
 				}
-				return;
 			}
-        }
 	}
 }

@@ -42,7 +42,7 @@ class IrcBot
 		void	sendPrivMsg(std::string const &source, std::string const &msg);
 		void	login();
 		void	start();
-		void	sendFile(std::string const &source, std::string const &fname, std::string const &name);
+		int		sendFile(std::string const &source, std::string const &fname, std::string const &name);
 		void	handleMessage(std::string const &msg);
 
 };

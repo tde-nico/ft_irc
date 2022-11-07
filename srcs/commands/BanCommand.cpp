@@ -16,35 +16,34 @@ void	Ban::execute(Client *client, std::vector<std::string> args)
 
 	if (channel == nullp)
 		return ;
-	Client	*target;
-    
 
-	for (int i = 0; i != (int)args.size(); ++i)
-	{
-		target = this->server->getClient(args.at(i));
-    
-        if (target != nullp)
-        {  
-            size_t z = 0;
-            if (target->getFd() != client->getFd())
+    if (channel->getAdmin().compare(client->getNickname()) == 0)
+    {
+        Client *target = NULL;    
+        std::string str;
+        for (size_t i = 0; i < channel->getfdBan()->size(); i++)
+        {
+            target = channel->getfdBan()->at(i);
+            if (target->getNickname() == args.at(0))
             {
-                while (z < channel->getfdBan()->size())
-                {
-                        if (channel->getfdBan()->at(z)->getFd() == target->getFd())
-                        {
-                            client->reply("already banned\n");
-                            return;
-                        }
-                        z++;
-                }
-                channel->getfdBan()->push_back(target);
-                channel->kick(client, target, "ban");
+                client->msgReply("Already banned");
+                return ;
             }
-            else
-            {
-                client->reply("you cannot ban yourself\n");
-            }
-            break;
         }
-	}
+    //    if (this->server->getClient(args.at(0)) == NULL)
+    //        return;
+    //    else
+     //   {
+            for (size_t i = 0; i < channel->getClients().size(); i++)
+            {
+                str = channel->getClients().at(i)->getNickname();
+                if (str.compare(args.at(0)) == 0 && str != client->getNickname())
+                {
+                    channel->getfdBan()->push_back(channel->getClients().at(i));
+                    channel->kick(client, channel->getClients().at(i), "BAN");
+                    break;
+                }
+            }
+      //  }
+    }
 }

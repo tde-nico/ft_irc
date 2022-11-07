@@ -20,6 +20,7 @@ class Client
 		std::string	msg;
 		std::string	username;
 		std::string	realname;
+		int			ban;
 
 		// 0: not logged
 		// 1: logged

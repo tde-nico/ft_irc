@@ -55,10 +55,11 @@ class Server
 		std::string				recive(int fd);
 		int						handle_message(int fd);
 		void					handle_disconnection(int fd);
-		Channel					*createChannel(std::string const &name, std::string const &password);
+		Channel					*createChannel(std::string const &name, std::string const &password, std::string admin);
 		Channel					*getChannel(std::string const &name);
 		std::vector<Channel *>	getChannels() { return (this->channels); }
 		Client					*getClient(std::string const &name);
+		CommandHandler			*getHandler(){return (this->handler);};
 };
 
 #endif

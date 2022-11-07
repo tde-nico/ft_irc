@@ -160,4 +160,13 @@ class WhoisCommand : public Command
 		void execute(Client *client, std::vector<std::string> args);
 };
 
+class Mode : public Command
+{
+	public:
+		Mode(Server *server, int auth = 0);
+		~Mode();
+
+		void execute(Client *client, std::vector<std::string> args);
+};
+
 #endif

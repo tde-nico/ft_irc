@@ -22,16 +22,17 @@ void	JoinCommand::execute(Client *client, std::vector<std::string> args)
 		client->msgReply(ERR_TOOMANYCHANNELS(client->getNickname(), name));
 		return ;
 	}
-
 	channel = this->server->getChannel(name);
 	if (channel == nullp)
-		channel = this->server->createChannel(name, password);
+		channel = this->server->createChannel(name, password, client->getNickname());
 	
 	if (password.compare(channel->getPassword()))
 	{
 		client->msgReply(ERR_BADCHANNELKEY(client->getNickname(), name));
 		return ;
 	}
-	
-	client->join(channel);
+	if (channel->CheckBan(client) != 1)
+		client->join(channel);
+	else
+		client->msgReply(ERR_BADCHANNELKEY(client->getNickname(), name));
 }
