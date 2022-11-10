@@ -41,8 +41,7 @@
 #define RPL_NOTICE(source, target, message)			":" + source + " NOTICE " + target + " :" + message
 #define RPL_QUIT(source, message)					":" + source + " QUIT :Quit: " + message
 #define RPL_KICK(source, channel, target, reason)	":" + source + " KICK " + channel + " " + target + " :" + reason
-#define RPL_MODE(source, channel, modes, args)		":" + source + " MODE " + channel + " " + modes + " " + args
-#define RPL_WHOISUSER(source,nick,user,host, real_name)	 "311" + source + nick + user + host +  real_name
+
 
 #define MAC_OS 0
 #define DEBUG 0

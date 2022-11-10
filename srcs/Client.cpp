@@ -7,7 +7,6 @@ Client::Client(int fd, std::string hostname, int port)
 	this->port = port;
 	this->status = 0;
 	this->channel = nullp;
-	this->ban = 0;
 }
 
 Client::~Client() {}
@@ -37,7 +36,6 @@ void	Client::reply(std::string const &msg) const
 	if (DEBUG)
 		console_log(msg);
 	std::string	tmp = msg + "\r\n";
-//	console_log(msg); // DEBUG
 	if (send(this->fd, tmp.c_str(), tmp.length(), 0) < 0)
 		throw std::runtime_error("Error while sending");
 }
@@ -61,7 +59,7 @@ void	Client::join(Channel *channel)
 {
 	std::string					users_string;
 	std::vector<std::string>	users;
-	
+
 	channel->addClient((this));
 	this->channel = channel;
 	users = channel->getNicknames();

@@ -15,11 +15,7 @@ CommandHandler::CommandHandler(Server *server)
 	this->commands["PART"] = new PartCommand(server, 1);
 	this->commands["PRIVMSG"] = new PrivMsgCommand(server, 1);
 	this->commands["NOTICE"] = new NoticeCommand(server, 1);
-	this->commands["WHO"] = new WhoisCommand(server);
-	this->commands["BAN"] = new Ban(server,1);
-	this->commands["MODE"] = new Mode(server, 1);
 
-	this->commands["UNBAN"] = new UnBan(server,1);
 	this->commands["KICK"] = new KickCommand(server, 2);
 }
 

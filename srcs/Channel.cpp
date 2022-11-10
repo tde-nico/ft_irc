@@ -4,7 +4,6 @@ Channel::Channel(std::string const &name, std::string const &password)
 {
 	this->name = name;
 	this->password = password;
-	this->Ban = new std::vector<Client *>;
 }
 
 Channel::~Channel() {}
@@ -68,22 +67,10 @@ void	Channel::removeClient(Client *client)
 void	Channel::kick(Client *client, Client *target, std::string const &reason)
 {
 	std::string	tmp;
-	
+
 	this->broadcast(RPL_KICK(client->getPrefix(), this->name, target->getNickname(), reason));
 	this->removeClient(target);
 
 	tmp = client->getNickname() + " kicked " + target->getNickname() + " form channel " + this->name;
 	console_log(tmp);
-}
-
-int		Channel::CheckBan(Client *client)
-{
-	std::vector<Client *>::iterator it;
-
-	for (it = this->getfdBan()->begin(); it != this->getfdBan()->end(); it++)
-	{
-		if (*it == client)
-			return (1);
-	}
-	return (0);
 }

@@ -19,7 +19,6 @@ class Client
 		std::string	nickname;
 		std::string	username;
 		std::string	realname;
-		int			ban;
 
 		// 0: not logged
 		// 1: logged

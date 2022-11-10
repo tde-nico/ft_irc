@@ -225,11 +225,9 @@ Channel	*Server::getChannel(std::string const &name)
 	return (nullp);
 }
 
-Channel	*Server::createChannel(std::string const &name, std::string const &password, std::string admin)
+Channel	*Server::createChannel(std::string const &name, std::string const &password)
 {
 	Channel	*channel = new Channel(name, password);
-	channel->setAdmin(admin);
 	this->channels.push_back(channel);
-
 	return (channel);
 }
